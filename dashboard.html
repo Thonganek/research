@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8f3320">
+<meta name="description" content="Dashboard งานวิจัย — รายชื่องานวิจัยและผู้วิจัย ความคืบหน้ารายบท เปิดอ่านเอกสารรายโครงการ">
+<title>Dashboard งานวิจัย · Research Uplink</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23e0764a'/%3E%3Cstop offset='1' stop-color='%238f3320'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='48' height='48' rx='14' fill='url(%23g)'/%3E%3Cpath d='M15 33V24M21 33V17M27 33v-7M33 33V20' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500&family=Noto+Sans+Thai:wght@400;500;600&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf7f4; --surface:#fff; --soft:#fcf5f1; --hover:#fbeee8;
+  --text:#2a1712; --text-2:#5b463f; --muted:#7f6a62;
+  --line:#f0e5de; --line-2:#e3d3ca;
+  --brand:#b4442a; --brand-d:#8f3320; --brand-c:#fde6dc; --on-brand-c:#5a1a0c;
+  --ok:#0b7a0b; --err:#b3261e;
+  /* สีประจำบท — ชุดสีเชิงหมวดหมู่ที่ผ่าน validate_palette (light) ตามลำดับนี้ */
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6;
+  --font:'Noto Sans Thai',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --display:'Prompt','Noto Sans Thai',system-ui,sans-serif;
+  --mono:'Roboto Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.2,0,0,1);
+  --shadow:0 1px 2px rgba(90,35,20,.05),0 14px 34px -20px rgba(90,35,20,.28);
+  --hero:linear-gradient(115deg,#5c1d10 0%,#8f3320 42%,#b4472a 78%,#c0533a 100%);
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:14px/1.6 var(--font);-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(900px 520px at 100% -8%,rgba(235,104,52,.09),transparent 62%),radial-gradient(760px 460px at -8% 6%,rgba(98,80,214,.07),transparent 62%)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.mono{font-family:var(--mono)}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{to{background-position:-200% 0}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+@keyframes blink{50%{opacity:.3}}
+
+/* ── แถบบน ── */
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:12px;height:64px;padding:0 16px 0 20px;
+  background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;flex:1 1 auto;min-width:0;text-decoration:none;color:var(--text)}
+.brand svg{width:38px;height:38px;flex:none}
+.brand span{overflow:hidden;font:400 18px var(--display);white-space:nowrap;text-overflow:ellipsis}
+.brand span b{font-weight:500;color:var(--brand)}
+.brand .dw{font-style:normal}
+.bar-right{display:flex;flex:none;align-items:center;gap:4px}
+.pill{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border:0;border-radius:20px;background:none;color:var(--text-2);
+  font:500 14px var(--font);text-decoration:none;white-space:nowrap;transition:background .15s,color .15s}
+button.pill:hover,a.pill:hover{background:var(--hover);color:var(--text)}
+.pill svg{width:18px;height:18px;flex:none}
+.pill.cta{margin-left:4px;padding:0 18px;background:linear-gradient(135deg,#c4573a,#8f3320);color:#fff;box-shadow:0 8px 18px -10px rgba(143,51,32,.8)}
+.pill.cta:hover{color:#fff;background:linear-gradient(135deg,#cf6446,#9a3a25)}
+.pill.admin.on{background:var(--brand-c);color:var(--on-brand-c)}
+.sync{font-weight:400;font-size:13px}
+.led{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none;background:#a99d97}
+.sync[data-state="ok"] .led{background:#1e8e3e;box-shadow:0 0 0 3px rgba(30,142,62,.15)}
+.sync[data-state="loading"] .led{background:var(--brand);animation:blink 1s ease-in-out infinite}
+.sync[data-state="err"] .led{background:#d93025}
+.sync b{font-weight:400}
+#btnRefresh.spin svg{animation:spin .9s linear infinite}
+
+.shell{position:relative;max-width:1320px;margin:0 auto;padding:0 24px 64px}
+
+/* ── หัวภาพรวม ── */
+.hero,.pj-hero{position:relative;overflow:hidden;isolation:isolate;color:#fff;background:var(--hero);box-shadow:0 30px 60px -34px rgba(120,40,20,.75)}
+.hero{margin-top:22px;padding:30px 32px 26px;border-radius:28px}
+.hero::before,.pj-hero::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:radial-gradient(440px 260px at 94% -12%,rgba(255,179,92,.36),transparent 70%),radial-gradient(400px 240px at 8% 125%,rgba(255,110,150,.30),transparent 70%),radial-gradient(320px 220px at 58% 135%,rgba(130,110,255,.24),transparent 70%)}
+.hero::after,.pj-hero::after{content:"";position:absolute;z-index:-1;right:-150px;top:-190px;width:480px;height:480px;border-radius:50%;border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 0 0 46px rgba(255,255,255,.035),0 0 0 92px rgba(255,255,255,.028),0 0 0 138px rgba(255,255,255,.02)}
+.hero-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.kicker{display:inline-flex;align-items:center;gap:8px;padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);font-size:13px}
+.kicker svg{width:15px;height:15px}
+.hero h1{margin:12px 0 0;font:300 clamp(28px,4vw,42px)/1.22 var(--display);letter-spacing:-.01em}
+.hero h1 b,.grad-t{font-weight:500;background:linear-gradient(90deg,#ffe3c6,#ffc58f 50%,#ffd3df);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:8px 0 0;max-width:62ch;color:rgba(255,255,255,.88)}
+.hero-meta{font-size:12.5px;color:rgba(255,255,255,.85);text-align:right}
+.hero-meta b{display:block;font:500 15px var(--display);color:#fff}
+.demo{display:none;margin-top:12px;padding:6px 12px;border-radius:10px;background:rgba(255,214,140,.18);border:1px solid rgba(255,214,140,.42);font-size:13px}
+.is-demo .demo{display:inline-block}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:24px}
+.kpi{position:relative;padding:16px 18px;border-radius:18px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.2);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:rise .5s var(--ease) both}
+.kpi em{display:block;padding-right:46px;font-style:normal;font-size:13.5px;color:rgba(255,255,255,.9)}
+.kpi .num{display:block;margin-top:6px;font:300 38px/1.1 var(--display)}
+.kpi .cap{display:block;margin-top:4px;font-size:12px;color:rgba(255,255,255,.82)}
+.k-ico{position:absolute;right:14px;top:14px;width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:var(--g);color:#fff;box-shadow:0 8px 18px -8px rgba(0,0,0,.5)}
+.k-ico svg{width:19px;height:19px}
+
+/* ── การ์ด & กราฟ ── */
+.panel{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.insights{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px;margin-top:16px}
+.card{padding:20px 22px;animation:rise .5s var(--ease) both}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.card-h.pad{margin:0;padding:16px 18px 6px}
+.card-h h2{display:flex;align-items:center;gap:10px;margin:0;font:500 16px var(--display)}
+.card-h h2 i{flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:var(--g);color:#fff}
+.card-h h2 i svg{width:16px;height:16px}
+.card-h small{font-size:12px;color:var(--muted);white-space:nowrap}
+.bars{display:grid;gap:2px}
+.brow{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:12px;align-items:center;margin:0 -8px;padding:6px 8px;border-radius:10px}
+#dsBars .brow{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) 34px}
+.brow:hover,.brow:focus-visible{background:var(--soft);outline:none}
+.blabel{display:flex;align-items:center;gap:9px;min-width:0;font-size:14px}
+.blabel span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.blabel small{color:var(--muted);font-size:12px}
+.dot{flex:none;display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c)}
+.btrack{position:relative;height:14px;border-left:1px solid var(--line-2)}
+.bfill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:0 4px 4px 0;background:var(--c,var(--brand));transition:width .9s var(--ease)}
+.bval{font-size:13px;text-align:right;white-space:nowrap}
+.bval small{color:var(--muted)}
+.muted-s{margin:0;font-size:13px;color:var(--muted)}
+
+.cols{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;align-items:end;height:178px;padding-top:24px;border-bottom:1px solid var(--line-2)}
+.col{position:relative;display:flex;align-items:flex-end;justify-content:center;height:100%;border-radius:8px;outline:none}
+.col:hover,.col:focus-visible{background:var(--soft)}
+.col i{display:block;width:100%;max-width:34px;height:0;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#e0764a,var(--brand));transition:height .9s var(--ease)}
+.col.now i{background:linear-gradient(180deg,#ffb35c,#eb6834)}
+.col b{position:absolute;left:0;right:0;text-align:center;font:500 12px var(--font);color:var(--text)}
+.xlabels{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;margin-top:6px;font-size:11.5px;color:var(--muted);text-align:center}
+.xlabels .now{color:var(--text);font-weight:600}
+.act-sum{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;font-size:12.5px;color:var(--text-2)}
+.act-sum b{font:500 15px var(--display);color:var(--text)}
+
+.s-wait{--c:#8a8f98;--ic:#4b5158}.s-review{--c:#fab219;--ic:#6b4500}.s-back{--c:#ec835a;--ic:#9c3b1c}.s-pass{--c:#0ca30c;--ic:#0b6b0b}
+.stack{display:flex;gap:2px;height:16px;margin:2px 0 16px;border-radius:6px;overflow:hidden;background:#f4ece7}
+.stack i{display:block;height:100%;min-width:3px;background:var(--c);transition:flex-grow .9s var(--ease)}
+.stlist{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0;padding:0;list-style:none}
+.st{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--c) 9%,#fff);border:1px solid color-mix(in srgb,var(--c) 24%,#fff)}
+.st-ico{flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:var(--c);color:#fff}
+.s-review .st-ico{color:#4a3000}
+.st-ico svg{width:16px;height:16px}
+.st-name{flex:1;min-width:0;font-size:13.5px}
+.st-num{font:500 19px/1 var(--display);text-align:right}
+.st-num small{display:block;margin-top:2px;font:400 11.5px var(--font);color:var(--muted)}
+.tip{position:fixed;z-index:90;max-width:260px;padding:8px 12px;border-radius:10px;background:#2a1712;color:#fff3ec;font-size:12px;line-height:1.5;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 10px 24px -10px rgba(0,0,0,.5)}
+.tip.show{opacity:1}
+.tip b{display:block;font-weight:500}
+
+/* ── ทะเบียน ── */
+.registry{margin-top:16px;overflow:hidden}
+.reg-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,var(--soft))}
+.tabs{display:flex;gap:4px;padding:4px;border-radius:22px;background:#f4ece7}
+.tab{height:34px;padding:0 16px;border:0;border-radius:18px;background:none;color:var(--text-2);font-size:14px;font-weight:500;transition:background .15s,color .15s}
+.tab:hover{color:var(--text)}
+.tab b{margin-left:6px;padding:0 7px;border-radius:9px;background:rgba(0,0,0,.06);font-size:12px;font-weight:500}
+.tab.on{background:#fff;color:var(--brand);box-shadow:0 1px 3px rgba(90,35,20,.15)}
+.tab.on b{background:var(--brand-c);color:var(--on-brand-c)}
+.tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.search{position:relative}
+.search svg{position:absolute;left:14px;top:50%;width:18px;height:18px;transform:translateY(-50%);color:var(--text-2)}
+.search input{width:min(280px,70vw);height:40px;padding:0 16px 0 42px;border:1px solid var(--line-2);border-radius:20px;background:#fff;outline:none;font-size:14px;transition:border-color .15s,box-shadow .15s}
+.search input:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(180,68,42,.12)}
+.sel{height:40px;padding:0 32px 0 14px;border:1px solid var(--line-2);border-radius:12px;outline:none;font-size:14px;appearance:none;background-color:#fff;
+  background-image:linear-gradient(45deg,transparent 50%,var(--text-2) 50%),linear-gradient(135deg,var(--text-2) 50%,transparent 50%);
+  background-position:calc(100% - 17px) 18px,calc(100% - 12px) 18px;background-size:5px 5px;background-repeat:no-repeat}
+.sel:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(180,68,42,.12)}
+.seg-filter{display:flex;overflow:hidden;border:1px solid var(--line-2);border-radius:20px;background:#fff}
+.seg-filter button{height:38px;padding:0 14px;border:0;background:none;font-size:13px;font-weight:500;transition:background .15s}
+.seg-filter button+button{border-left:1px solid var(--line-2)}
+.seg-filter button:hover{background:var(--soft)}
+.seg-filter button.on{background:var(--brand-c);color:var(--on-brand-c)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border:1px solid var(--line-2);border-radius:20px;background:#fff;color:var(--text);
+  font:500 13.5px var(--font);text-decoration:none;white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+.btn:hover{background:var(--soft);border-color:#d7c2b6}
+.btn svg{width:17px;height:17px;flex:none}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-d);border-color:var(--brand-d)}
+.btn.danger{color:var(--err);border-color:#f1c6c1}
+.btn.danger:hover{background:#fdecea;border-color:#e8a59e}
+.btn.glass{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.3);color:#fff}
+.btn.glass:hover{background:rgba(255,255,255,.22)}
+.btn.glass.danger{color:#ffe0dc;border-color:rgba(255,190,180,.45)}
+.btn.glass.danger:hover{background:rgba(255,120,100,.22)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+table{width:100%;border-collapse:collapse}
+thead th{position:sticky;top:64px;z-index:2;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line);text-align:left;font-size:12px;font-weight:500;color:var(--text-2);white-space:nowrap}
+tbody td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tr.row{cursor:pointer;transition:background .15s}
+tr.row:hover{background:var(--soft)}
+tr.row:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+.c-idx{width:44px;font-size:12px;color:var(--muted)}
+.code{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--brand);white-space:nowrap}
+.c-title{min-width:260px}
+.c-title .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px;line-height:1.5;font-weight:500}
+.dz{display:inline-block;margin-top:6px;padding:1px 10px;border-radius:8px;background:var(--brand-c);color:var(--on-brand-c);font-size:12px}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.who b{display:block;font-weight:500;white-space:nowrap}
+.who small{display:block;font-size:12px;line-height:1.45;color:var(--muted)}
+.avatar{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:var(--av);color:#fff;font:500 14px var(--display);text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.prog{display:flex;align-items:flex-end;gap:10px}
+.segs{display:flex;align-items:flex-end;gap:3px;height:22px}
+.sg{display:block;width:8px;height:var(--h,18px);border-radius:3px;background:#ebe1db}
+.sg.on{background:var(--c)}
+.sg.v2{box-shadow:inset 0 4px 0 rgba(255,255,255,.6)}
+.frac{font-size:12.5px;white-space:nowrap;color:var(--text-2)}
+.frac.full{color:var(--ok);font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px 0 9px;border-radius:9px;background:color-mix(in srgb,var(--c) 14%,#fff);font-size:12.5px;white-space:nowrap}
+.badge svg{width:15px;height:15px;color:var(--ic)}
+.badge.glass{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff}
+.badge.glass svg{color:#fff}
+.c-date{font-size:12.5px;color:var(--text-2);white-space:nowrap}
+.c-go{width:1%;text-align:right;white-space:nowrap}
+.go-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;white-space:nowrap;border-radius:16px;background:var(--brand-c);color:var(--on-brand-c);font-size:12.5px;font-weight:500;transition:background .15s}
+.go-btn svg{width:15px;height:15px}
+tr.row:hover .go-btn{background:var(--brand);color:#fff}
+
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;padding:16px 18px 20px}
+.person{padding:16px 18px;border:1px solid var(--line);border-radius:18px;background:#fff;animation:rise .4s var(--ease) both;transition:box-shadow .2s}
+.person:hover{box-shadow:var(--shadow)}
+.p-top{display:flex;align-items:center;gap:12px}
+.p-top .avatar{width:44px;height:44px;border-radius:14px;font-size:16px}
+.p-top b{display:block;font-size:15px;font-weight:500;line-height:1.4}
+.p-top small{display:block;font-size:12px;color:var(--muted)}
+.p-stats{display:flex;gap:16px;margin:12px 0 8px;font-size:12px;color:var(--text-2)}
+.p-stats b{font-size:14px;font-weight:500;color:var(--text)}
+.p-list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.p-list li{margin:0 -8px;padding:10px 8px 8px;border-top:1px solid var(--line);border-radius:10px;cursor:pointer}
+.p-list li:hover{background:var(--soft)}
+.p-list .t{font-size:13.5px;line-height:1.5}
+.p-list .row2{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:6px}
+
+.empty,.loading,.error{padding:56px 20px;text-align:center;color:var(--text-2)}
+.empty b,.error b{display:block;margin-bottom:4px;font-size:16px;font-weight:500;color:var(--text)}
+.error b{color:var(--err)}
+.skel{height:14px;max-width:720px;margin:12px auto;border-radius:7px;background:linear-gradient(90deg,#f1e7e1 25%,#faf4f0 50%,#f1e7e1 75%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+.keyform{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
+.keyform input{height:40px;padding:0 14px;border:1px solid var(--line-2);border-radius:12px;outline:none}
+.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:22px;padding:0 4px;font-size:12px;color:var(--muted)}
+
+/* ── หน้างานวิจัยรายโครงการ ── */
+.pj{animation:rise .4s var(--ease)}
+.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:20px 0 14px;font-size:13px;color:var(--muted)}
+.crumbs .btn{height:36px;padding:0 14px}
+.okbar{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 10px 10px 16px;border-radius:16px;background:#e7f6ea;border:1px solid #c5e8cd;color:#0d3b1e;animation:rise .4s var(--ease)}
+.okbar>svg{flex:none;width:22px;height:22px;color:var(--ok)}
+.okbar span{flex:1;min-width:0}
+.icon-x{flex:none;width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:50%;background:none;color:inherit}
+.icon-x:hover{background:rgba(0,0,0,.06)}
+.icon-x svg{width:17px;height:17px}
+.pj-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;padding:26px 28px;border-radius:26px}
+.pj-tags{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.code-chip{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:9px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.2);font:500 12.5px var(--mono);letter-spacing:.04em}
+.tag-g{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:9px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.26);font-size:12.5px}
+.pj-title{margin:12px 0 0;font:400 clamp(21px,2.8vw,30px)/1.45 var(--display);outline:none}
+.pj-meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:12px;font-size:13.5px;color:rgba(255,255,255,.9)}
+.pj-meta span{display:inline-flex;align-items:center;gap:6px}
+.pj-meta svg{width:16px;height:16px;opacity:.85}
+.pj-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px}
+.pj-actions .sp{flex:1}
+.ring{position:relative;width:128px;height:128px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:9}
+.ring .rt{stroke:rgba(255,255,255,.18)}
+.ring .rb{stroke:url(#ringG);stroke-linecap:round;stroke-dasharray:100;transition:stroke-dashoffset 1s var(--ease)}
+.ring div{position:absolute;inset:0;display:grid;place-items:center;align-content:center;text-align:center}
+.ring b{font:300 30px/1 var(--display)}
+.ring small{margin-top:4px;font-size:11.5px;color:rgba(255,255,255,.85)}
+
+.pj-grid{display:grid;grid-template-columns:330px minmax(0,1fr);grid-template-areas:"nav reader" "info reader";gap:16px;align-items:start;margin-top:16px}
+.pj-grid>*{min-width:0}
+.pj-nav{grid-area:nav}
+.pj-info{grid-area:info;display:grid;gap:16px}
+.reader{grid-area:reader;position:sticky;top:80px;overflow:hidden}
+.chs{display:grid;gap:4px;padding:8px 10px 12px}
+.ch{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;padding:10px 12px;border:0;border-radius:14px;background:none;text-align:left;color:var(--text);transition:background .15s}
+.ch:hover{background:var(--soft)}
+.ch.on{background:color-mix(in srgb,var(--c) 11%,#fff);box-shadow:inset 3px 0 0 var(--c)}
+.cn{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:color-mix(in srgb,var(--c) 14%,#fff);border:1px solid color-mix(in srgb,var(--c) 38%,#fff)}
+.cn .dot{width:11px;height:11px}
+.ch.miss .cn{background:#f7f1ee;border:1px dashed var(--line-2)}
+.ch.miss .cn .dot{background:#d9cbc3}
+.ch b{display:block;font:500 14.5px/1.35 var(--display)}
+.ch small{display:block;overflow:hidden;font-size:12px;color:var(--muted);white-space:nowrap;text-overflow:ellipsis}
+.vt{padding:2px 8px;border-radius:8px;background:#f4ece7;color:var(--text-2);font:500 11.5px var(--mono);white-space:nowrap}
+.ch.miss .vt{background:none;color:var(--muted);font:400 12px var(--font)}
+.note-box{padding:16px 18px 18px;background:linear-gradient(180deg,#fff8ec,#fff)}
+.note-box h3{display:flex;align-items:center;gap:8px;margin:0 0 6px;font:500 15px var(--display)}
+.note-box h3 svg{width:17px;height:17px;color:#c98500}
+.note-box p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text-2)}
+.tl{list-style:none;margin:0;padding:8px 18px 14px}
+.tl li{position:relative;padding:0 0 16px 28px}
+.tl li::before{content:"";position:absolute;left:5px;top:6px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--brand)}
+.tl li::after{content:"";position:absolute;left:10.5px;top:22px;bottom:0;width:1px;background:var(--line-2)}
+.tl li:last-child{padding-bottom:4px}
+.tl li:last-child::after{display:none}
+.tl li:first-child::before{background:var(--brand);box-shadow:0 0 0 4px var(--brand-c)}
+.tl .when{display:block;font-size:12px;color:var(--muted)}
+.tl b{font:500 14px var(--display)}
+.tl b em{margin-left:6px;font-style:normal;font-weight:400;font-size:12.5px;color:var(--text-2)}
+.dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.dchip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:14px;border:1px solid var(--line-2);background:#fff;font-size:12.5px;transition:border-color .15s,background .15s}
+.dchip:hover{border-color:var(--c)}
+.dchip.on{background:color-mix(in srgb,var(--c) 12%,#fff);border-color:var(--c)}
+.dchip .dot{width:8px;height:8px}
+
+.rd-bar{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;padding:14px 14px 14px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,var(--soft))}
+.rd-t{flex:1;min-width:210px}
+.rd-t b{display:flex;align-items:center;gap:9px;font:500 17px var(--display)}
+.rd-t b .sub{font:400 14px var(--font);color:var(--text-2)}
+.rd-t small{display:block;margin-top:2px;overflow:hidden;font-size:12.5px;color:var(--muted);white-space:nowrap;text-overflow:ellipsis}
+.rd-act{display:flex;align-items:center;gap:6px}
+.ibtn{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line-2);border-radius:12px;background:#fff;color:var(--text-2);text-decoration:none;transition:background .15s,color .15s,border-color .15s}
+.ibtn:hover{background:var(--soft);color:var(--text)}
+.ibtn svg{width:18px;height:18px}
+.ibtn.danger:hover{background:#fdecea;border-color:#e8a59e;color:var(--err)}
+.ibtn:disabled{opacity:.4;cursor:not-allowed}
+.vers{display:flex;gap:3px;padding:3px;border-radius:12px;background:#f4ece7}
+.vers button{height:30px;padding:0 10px;border:0;border-radius:9px;background:none;color:var(--text-2);font:500 12px var(--mono)}
+.vers button.on{background:#fff;color:var(--brand);box-shadow:0 1px 3px rgba(90,35,20,.18)}
+.rd-stage{position:relative;height:min(80vh,920px);min-height:440px;background:#eee5df}
+.rd-stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.rd-load{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:12px;color:var(--muted);background:#eee5df;transition:opacity .35s}
+.rd-load.gone{opacity:0;pointer-events:none}
+.spinner{width:34px;height:34px;border-radius:50%;border:3px solid #e0cfc5;border-top-color:var(--brand);animation:spin .9s linear infinite}
+.rd-empty{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;padding:24px;text-align:center;color:var(--text-2)}
+.rd-empty .big{width:64px;height:64px;display:grid;place-items:center;margin:0 auto 4px;border-radius:20px;background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c)}
+.rd-empty .big svg{width:30px;height:30px}
+.rd-empty b{font:500 17px var(--display);color:var(--text)}
+.rd-empty .dchips{justify-content:center}
+.rd-hint{margin:0;padding:10px 20px 14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.reader:fullscreen{border-radius:0}
+.reader:fullscreen .rd-stage{height:calc(100vh - 68px)}
+.fake{position:absolute;inset:0;overflow:auto;padding:28px 20px}
+.paper{max-width:680px;margin:0 auto;padding:60px 64px 72px;background:#fff;box-shadow:0 12px 32px -14px rgba(60,30,20,.3);font-family:'Prompt',sans-serif;color:#222}
+.paper h4{margin:0 0 6px;text-align:center;font:500 20px var(--display)}
+.paper h5{margin:26px 0 10px;font:500 15px var(--display)}
+.paper .cen{text-align:center;color:#555;font-size:14px}
+.paper .ln{height:9px;margin:12px 0;border-radius:5px;background:#ece4df}
+.paper .stamp{margin:0 auto 26px;width:max-content;padding:4px 12px;border-radius:8px;background:#fff4e5;color:#8a5a00;font-size:12px}
+
+dialog{width:min(580px,calc(100vw - 28px));max-height:calc(100vh - 40px);padding:0;border:0;border-radius:24px;background:#fff;color:var(--text);box-shadow:0 30px 80px -20px rgba(40,15,8,.55)}
+dialog::backdrop{background:rgba(40,18,10,.45);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+dialog[open]{animation:rise .25s var(--ease)}
+.dlg-h{display:flex;align-items:flex-start;gap:12px;padding:22px 24px 6px}
+.dlg-h .k-ico{position:static;flex:none}
+.dlg-h h3{margin:0;font:500 18px/1.4 var(--display)}
+.dlg-h p{margin:4px 0 0;font-size:13.5px;color:var(--text-2)}
+.dlg-b{display:grid;gap:14px;max-height:62vh;overflow:auto;padding:12px 24px 4px}
+.fld label,.fld .lbl{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:var(--text-2)}
+.fld input,.fld textarea{display:block;width:100%;padding:10px 14px;border:1px solid var(--line-2);border-radius:12px;background:#fff;outline:none;font-size:14px;transition:border-color .15s,box-shadow .15s}
+.fld textarea{min-height:76px;resize:vertical;line-height:1.55}
+.fld input:focus,.fld textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(180,68,42,.12)}
+.fld .hint{margin-top:4px;font-size:12px;color:var(--muted)}
+.fields2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rv-opts{display:flex;flex-wrap:wrap;gap:8px}
+.rv{position:relative}
+.rv input{position:absolute;opacity:0;pointer-events:none}
+.rv span{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 9px;border:1px solid var(--line-2);border-radius:10px;background:#fff;font-size:13px;cursor:pointer;transition:background .15s,border-color .15s}
+.rv span svg{width:15px;height:15px;color:var(--ic)}
+.rv input:checked+span{background:color-mix(in srgb,var(--c) 16%,#fff);border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.rv input:focus-visible+span{outline:2px solid var(--brand);outline-offset:2px}
+.dlg-err{min-height:18px;margin:0;color:var(--err);font-size:13px}
+.dlg-f{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;padding:14px 24px 22px}
+.code-q{display:inline-block;padding:1px 8px;border-radius:6px;background:#f4ece7;font:500 13px var(--mono);user-select:all}
+.toast{position:fixed;left:50%;bottom:24px;z-index:95;max-width:min(560px,calc(100vw - 32px));padding:12px 20px;border-radius:14px;background:#2a1712;color:#fff3ec;font-size:14px;
+  box-shadow:0 16px 40px -16px rgba(0,0,0,.6);opacity:0;transform:translate(-50%,12px);transition:opacity .2s,transform .3s var(--ease);pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1180px){
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .insights{grid-template-columns:1fr 1fr}
+}
+@media (max-width:980px){
+  .insights{grid-template-columns:1fr}
+  .pj-grid{grid-template-columns:1fr;grid-template-areas:"nav" "reader" "info"}
+  .reader{position:relative;top:auto}
+  .chs{display:flex;gap:8px;overflow-x:auto;padding:6px 12px 14px;scroll-snap-type:x proximity}
+  .ch{flex:none;width:auto;min-width:200px;scroll-snap-align:start;border:1px solid var(--line)}
+  .ch.on{border-color:var(--c)}
+  .rd-stage{height:72vh;min-height:380px}
+}
+@media (max-width:820px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bar-right .pill span.lbl{display:none}
+  .hero{padding:24px 20px 20px}
+  .hero-meta{text-align:left}
+  .pj-hero{grid-template-columns:1fr;padding:22px 20px}
+  .ring{position:absolute;right:16px;top:16px;width:84px;height:84px}
+  .ring b{font-size:20px}.ring small{display:none}
+  .pj-tags{padding-right:92px}
+  thead{display:none}
+  table,tbody,tr,td{display:block}
+  tr.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+  tr.row td{padding:0;border:0}
+  .c-idx,.c-go{display:none!important}
+  .c-title{grid-column:1/-1;min-width:0}
+  .c-who,.c-prog{grid-column:1/-1}
+  .c-rev{grid-column:1;grid-row:4}
+  .c-date{grid-column:2;grid-row:4;align-self:center}
+  .c-date::before{content:"อัปเดต "}
+  .brow{grid-template-columns:110px minmax(0,1fr) 56px}
+  .stlist{grid-template-columns:1fr}
+  .fields2{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .shell{padding:0 12px 48px}
+  .topbar{padding:0 6px 0 12px}
+  .brand span{font-size:17px}
+  .brand .dw{display:none}
+  .sync b{display:none}
+  .tools{width:100%}
+  .search,.search input{width:100%}
+  .kpi{padding:14px}
+  .kpi .num{font-size:30px}
+  .k-ico{width:32px;height:32px;right:10px;top:10px}
+  .rd-bar{padding:12px}
+  .cols,.xlabels{gap:5px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="ringG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe3c6"/><stop offset=".55" stop-color="#ffb35c"/><stop offset="1" stop-color="#ff8fb1"/></linearGradient></defs></svg>
+
+<header class="topbar">
+  <a class="brand" href="dashboard.html" title="หน้ารวม Dashboard">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0764a"/><stop offset="1" stop-color="#8f3320"/></linearGradient></defs><rect width="48" height="48" rx="14" fill="url(#bg1)"/><path d="M15 33V24M21 33V17M27 33v-7M33 33V20" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
+    <span><em class="dw">Dashboard </em><b>งานวิจัย</b></span>
+  </a>
+  <div class="bar-right">
+    <span class="pill sync" id="sync" data-state="loading" aria-live="polite"><span class="led"></span><b>กำลังโหลด</b></span>
+    <button type="button" class="pill" id="btnRefresh" title="โหลดข้อมูลล่าสุด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7L20 8.6M20 4v4.6h-4.6"/></svg><span class="lbl">รีเฟรช</span></button>
+    <button type="button" class="pill admin" id="btnAdmin" title="โหมดผู้ดูแล (แก้ไข / ลบ)"></button>
+    <a class="pill cta" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span class="lbl">ส่งงานวิจัย</span></a>
+  </div>
+</header>
+
+<main class="shell">
+  <div id="viewList">
+    <section class="hero" aria-label="ภาพรวม">
+      <div class="hero-top">
+        <div>
+          <span class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.4L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.6z"/></svg>ภาพรวมระบบส่งงานวิจัย</span>
+          <h1>รายชื่อ<b>งานวิจัย</b>และ<b>ผู้วิจัย</b></h1>
+          <p>ความคืบหน้าการส่งเอกสารรายบท สถานะการตรวจ และเปิดอ่านงานของแต่ละโครงการได้ในหน้าเดียว — อัปเดตจาก Google Sheets อัตโนมัติ</p>
+          <div class="demo">⚠ โหมดทดลอง — ยังไม่ได้ตั้งค่า <span class="mono">CONFIG.GAS_URL</span> กำลังแสดงข้อมูลตัวอย่าง</div>
+        </div>
+        <div class="hero-meta">อัปเดตล่าสุด<b id="lastSync">—</b></div>
+      </div>
+      <div class="kpis" id="kpis" aria-label="ตัวเลขสรุป"></div>
+    </section>
+
+    <section class="insights" id="insights">
+      <div class="panel card">
+        <div class="card-h"><h2><i data-ic="layers" style="--g:linear-gradient(135deg,#6aa8ff,#2a62d6)" aria-hidden="true"></i>ส่งแล้วรายบท</h2><small id="barsCap">—</small></div>
+        <div class="bars" id="bars" role="list"></div>
+      </div>
+      <div class="panel card">
+        <div class="card-h"><h2><i data-ic="wave" style="--g:linear-gradient(135deg,#ffb35c,#eb6834)" aria-hidden="true"></i>การส่งงาน 8 สัปดาห์ล่าสุด</h2><small id="actCap">—</small></div>
+        <div class="cols" id="cols" role="list"></div>
+        <div class="xlabels" id="xlabels" aria-hidden="true"></div>
+        <div class="act-sum" id="actSum"></div>
+      </div>
+      <div class="panel card">
+        <div class="card-h"><h2><i data-ic="check" style="--g:linear-gradient(135deg,#4fd1a1,#14946a)" aria-hidden="true"></i>สถานะการตรวจ</h2><small id="stCap">—</small></div>
+        <div class="stack" id="stack" aria-hidden="true"></div>
+        <ul class="stlist" id="stlist"></ul>
+      </div>
+      <div class="panel card">
+        <div class="card-h"><h2><i data-ic="spark" style="--g:linear-gradient(135deg,#b3a6ff,#6250d6)" aria-hidden="true"></i>รูปแบบงานวิจัย</h2><small id="dsCap">—</small></div>
+        <div class="bars" id="dsBars" role="list"></div>
+      </div>
+    </section>
+
+    <section class="panel registry" aria-label="ทะเบียนงานวิจัย">
+      <div class="reg-head">
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab on" role="tab" aria-selected="true" data-view="projects">งานวิจัย<b id="cntP">0</b></button>
+          <button type="button" class="tab" role="tab" aria-selected="false" data-view="people">ผู้วิจัย<b id="cntR">0</b></button>
+        </div>
+        <div class="tools">
+          <label class="search"><span class="sr-only">ค้นหา</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" type="search" placeholder="ค้นหาชื่อเรื่อง ผู้วิจัย รหัส…" autocomplete="off"></label>
+          <div class="seg-filter" role="group" aria-label="กรองความครบถ้วน">
+            <button type="button" class="on" data-f="all">ทั้งหมด</button><button type="button" data-f="done">ครบแล้ว</button><button type="button" data-f="todo">ยังไม่ครบ</button>
+          </div>
+          <select class="sel" id="fReview" aria-label="กรองสถานะการตรวจ"><option value="">ทุกสถานะ</option></select>
+          <select class="sel" id="fDesign" aria-label="กรองรูปแบบงานวิจัย"><option value="">ทุกรูปแบบ</option></select>
+          <select class="sel" id="fSort" aria-label="เรียงลำดับ">
+            <option value="updated">อัปเดตล่าสุด</option><option value="first">ส่งครั้งแรกล่าสุด</option>
+            <option value="progress">ความคืบหน้ามาก → น้อย</option><option value="title">ชื่อเรื่อง ก → ฮ</option>
+          </select>
+          <button type="button" class="btn" id="btnCsv" title="ส่งออกรายการที่กรองอยู่เป็น CSV (เปิดใน Excel ได้)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>CSV</button>
+        </div>
+      </div>
+      <div id="regBody"><div class="loading"><div class="skel"></div><div class="skel" style="max-width:600px"></div><div class="skel" style="max-width:660px"></div></div></div>
+    </section>
+  </div>
+
+  <div id="viewProject" class="pj" hidden></div>
+
+  <footer class="foot"><span>ระบบส่งงานข้อมูลวิจัย · Dashboard</span><span id="footInfo">—</span></footer>
+</main>
+
+<div class="tip" id="tip" role="tooltip"><b></b><span></span></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
+
+<script>
+(() => {
+'use strict';
+/* ══════════════════════════════════════════════════════════════
+   ⚙ CONFIG — ใช้ Web App URL เดียวกับ index.html
+   ══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbyJVzD1IxBsySt7vGcUPLtXvrjNtX_peMmFaF0GnUVQ2YG7-6to6z_csW9r00bGNF6hiw/exec',
+  DASHBOARD_KEY: '',          // ถ้าตั้ง CONFIG.DASHBOARD_KEY ใน Code.gs ให้ใส่ค่าเดียวกัน (หรือเว้นว่างแล้วกรอกในหน้าเว็บ)
+  REFRESH_MS: 120000,         // รีเฟรชอัตโนมัติทุก 2 นาที
+  FORM_URL: 'index.html',
+};
+// สีประจำบท (ลำดับ = ลำดับชุดสีที่ผ่านการตรวจ) · ใช้ร่วมกันทั้งกราฟ ตาราง และหน้าอ่านงาน
+const SLOTS = [
+  { key: 'title', label: 'ชื่อเรื่อง',     sub: 'หน้าปก',              c: 'var(--s1)', h: 16 },
+  { key: 'ch1',   label: 'บทที่ 1',        sub: 'บทนำ',                c: 'var(--s2)', h: 20 },
+  { key: 'ch2',   label: 'บทที่ 2',        sub: 'เอกสารที่เกี่ยวข้อง',   c: 'var(--s3)', h: 18 },
+  { key: 'ch3',   label: 'บทที่ 3',        sub: 'วิธีดำเนินการวิจัย',    c: 'var(--s4)', h: 21 },
+  { key: 'ch4',   label: 'บทที่ 4',        sub: 'ผลการวิจัย',           c: 'var(--s5)', h: 19 },
+  { key: 'ch5',   label: 'บทที่ 5',        sub: 'สรุปและอภิปรายผล',     c: 'var(--s6)', h: 17 },
+  { key: 'ref',   label: 'เอกสารอ้างอิง', sub: 'บรรณานุกรม',           c: 'var(--s7)', h: 15 },
+];
+const DESIGNS = ['การวิจัยและพัฒนา (Research & Development)', 'การวิจัยเชิงปฏิบัติการ (Action Research)', 'การวิจัยกึ่งทดลอง (Quasi-Experimental)',
+  'การวิจัยเชิงทดลอง (Experimental / RCT)', 'การวิจัยเชิงวิเคราะห์ (Analytical)', 'การวิจัยเชิงพรรณนา / สำรวจ (Descriptive / Survey)',
+  'การวิจัยเชิงคุณภาพ (Qualitative)', 'การวิจัยแบบผสานวิธี (Mixed Methods)'];
+const sv = (d, w = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC = {
+  clock: sv('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
+  eye: sv('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>'),
+  back: sv('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'),
+  check: sv('<path d="m5 12.5 4.5 4.5L19 7.5"/>', 2.4),
+  doc: sv('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>', 1.8),
+  user: sv('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.4-6 8-6s6.8 2 8 6"/>', 1.9),
+  done: sv('<path d="M20 6 9 17l-5-5"/>', 2.2),
+  wave: sv('<path d="M4 18V11M9 18V6M14 18v-8M19 18V9"/>'),
+  book: sv('<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>', 1.8),
+  edit: sv('<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>', 1.9),
+  trash: sv('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', 1.9),
+  ext: sv('<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>', 1.9),
+  dl: sv('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'),
+  full: sv('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
+  prev: sv('<path d="m15 6-6 6 6 6"/>'),
+  next: sv('<path d="m9 6 6 6-6 6"/>'),
+  folder: sv('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>', 1.9),
+  lock: sv('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', 1.9),
+  unlock: sv('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/>', 1.9),
+  cal: sv('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>', 1.9),
+  pin: sv('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>', 1.9),
+  layers: sv('<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>', 1.9),
+  note: sv('<path d="M5 4h10l4 4v12H5z"/><path d="M14 4v5h5M8 13h8M8 17h5"/>', 1.9),
+  x: sv('<path d="M6 6l12 12M18 6 6 18"/>', 2.4),
+  copy: sv('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/>', 1.9),
+  up: sv('<path d="M12 19V5M5 12l7-7 7 7"/>'),
+  spark: sv('<path d="M12 3l1.8 5.4L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.6z"/>'),
+  ok: sv('<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/>', 2.2),
+};
+const REVIEW = {
+  'รอตรวจ':       { cls: 's-wait',   icon: IC.clock },
+  'กำลังตรวจ':    { cls: 's-review', icon: IC.eye },
+  'ส่งกลับแก้ไข': { cls: 's-back',   icon: IC.back },
+  'ผ่าน':         { cls: 's-pass',   icon: IC.check },
+};
+const AV = [['#ffb35c', '#d9622c'], ['#ff8fb1', '#c9406f'], ['#4fd1a1', '#0f8a62'], ['#6aa8ff', '#2458c4'],
+  ['#b3a6ff', '#5a48c8'], ['#f6c344', '#b57a00'], ['#ff8a7a', '#b8352a'], ['#5fd0e0', '#0f7d90']];
+const KEY_STORE = 'research-uplink-dash-key', ADMIN_STORE = 'research-uplink-admin', ADMIN_USER_STORE = 'research-uplink-admin-user';
+const DEMO = !/^https:\/\/script\.google\.com\/.+\/exec\/?$/.test(CONFIG.GAS_URL.trim());
+const CODE_RE = /^RS-\d{6}-\d{4}-[A-Z0-9]{4}$/;
+const FILE_ID = /^[\w-]{10,}$/;
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const ssGet = k => { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } };
+const ssSet = (k, v) => { try { if (v) sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); } catch (e) { /* ignore */ } };
+const toDate = s => { const d = s ? new Date(s) : null; return d && !isNaN(d.getTime()) ? d : null; };
+const shortDesign = s => String(s || '').replace(/^อื่น ๆ:\s*/, '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+const thShort = d => d ? d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) : '—';
+const thDM = d => d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+const thTime = d => d.toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const thDT = d => d ? d.toLocaleString('th-TH', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' น.' : '—';
+const slotOf = label => SLOTS.find(s => label === s.label || String(label).startsWith(s.label + ' '));
+const viewUrl = id => `https://drive.google.com/file/d/${encodeURIComponent(id)}/view`;
+const isDemoId = id => /^demo-/.test(String(id || ''));
+
+const state = {
+  data: null, demo: null, view: 'projects', q: '', f: 'all', review: '', design: '', sort: 'updated', loading: false,
+  key: ssGet(KEY_STORE) || CONFIG.DASHBOARD_KEY, admin: ssGet(ADMIN_STORE), adminUser: ssGet(ADMIN_USER_STORE), cur: null, listY: 0, fromList: false, okCode: '',
+};
+
+/* ───────── data ───────── */
+async function load(opts = {}) {
+  if (state.loading) return;
+  state.loading = true;
+  setSync('loading', 'กำลังโหลด');
+  $('#btnRefresh').classList.add('spin');
+  try {
+    let d;
+    if (DEMO) { await sleep(opts.quick ? 150 : 450); d = demoList(); }
+    else {
+      const u = new URL(CONFIG.GAS_URL);
+      u.searchParams.set('action', 'list');
+      if (state.key) u.searchParams.set('key', state.key);
+      u.searchParams.set('t', Date.now());
+      let res;
+      try { res = await fetch(u.toString()); } catch (e) { throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ — ตรวจสอบอินเทอร์เน็ต'); }
+      try { d = await res.json(); } catch (e) { throw new Error('ข้อมูลตอบกลับไม่ถูกต้อง — ตรวจสอบ Web App URL'); }
+    }
+    if (!d.ok) throw new Error(d.error || 'โหลดข้อมูลไม่สำเร็จ');
+    state.data = prepare(d);
+    render();
+    setSync('ok', 'อัปเดตแล้ว');
+    $('#lastSync').textContent = thTime(new Date());
+    renderAdminPill();
+    if (!handleArrival() && !opts.silent) route(!!opts.force);
+  } catch (e) {
+    setSync('err', 'โหลดไม่สำเร็จ');
+    const msg = e.message || String(e);
+    if (/รหัสผ่าน/.test(msg)) showKeyForm(msg);
+    else if (!state.data) showError(/ไม่รู้จักคำสั่ง/.test(msg)
+      ? 'เซิร์ฟเวอร์ยังเป็น Code.gs เวอร์ชันเก่า — วาง Code.gs ใหม่ รัน setup() แล้ว Deploy → Manage deployments → New version' : msg);
+    else toast(msg);
+  } finally {
+    state.loading = false;
+    $('#btnRefresh').classList.remove('spin');
+  }
+}
+
+function prepare(d) {
+  const projects = (d.projects || []).map(p => {
+    const history = (p.history || []).map(h => ({ ...h, at: toDate(h.at), docs: (h.docs || []).filter(x => x && x.id) }))
+      .sort((a, b) => ((a.at ? a.at.getTime() : 0) - (b.at ? b.at.getTime() : 0)) || (a.round - b.round));
+    return {
+      ...p, slots: p.slots || {}, history, note: p.note || '', folderId: p.folderId || '',
+      firstAt: toDate(p.firstAt), updatedAt: toDate(p.updatedAt) || toDate(p.firstAt),
+      name: `${p.firstName} ${p.lastName}`.trim(), who: norm(p.firstName) + '|' + norm(p.lastName),
+      design: p.design || '', dshort: shortDesign(p.design), review: p.review || 'รอตรวจ',
+      hay: norm([p.code, p.title, p.firstName, p.lastName, p.workplace, p.design].join(' ')),
+    };
+  });
+  const statuses = d.reviewStatuses && d.reviewStatuses.length ? d.reviewStatuses : Object.keys(REVIEW);
+  return { projects, statuses, api: Number(d.api) || 2, details: !!d.details, canManage: !!d.canManage, generatedAt: toDate(d.generatedAt) || new Date() };
+}
+
+async function api(body) {
+  if (body.action === 'update' || body.action === 'delete') body = { ...body, adminUser: state.adminUser, adminKey: state.admin };
+  if (DEMO) return demoApi(body);
+  let res, d;
+  try {
+    res = await fetch(CONFIG.GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+  } catch (e) { throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ — ตรวจสอบอินเทอร์เน็ต'); }
+  try { d = await res.json(); } catch (e) { throw new Error('ข้อมูลตอบกลับไม่ถูกต้อง'); }
+  if (!d.ok) throw new Error(/ไม่รู้จักคำสั่ง/.test(d.error || '') ? 'เซิร์ฟเวอร์ยังเป็น Code.gs เวอร์ชันเก่า — อัปเดต Code.gs แล้ว Deploy เวอร์ชันใหม่' : (d.error || 'ทำรายการไม่สำเร็จ'));
+  return d;
+}
+
+function setSync(st, text) { const el = $('#sync'); el.dataset.state = st; $('b', el).textContent = text; }
+let toastT;
+function toast(msg, ms = 3600) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+
+/* ───────── หน้ารวม ───────── */
+function render() {
+  const { projects, statuses } = state.data;
+  const people = groupPeople(projects);
+  const complete = projects.filter(p => p.done >= p.total).length;
+  const files = projects.reduce((a, p) => a + p.done, 0);
+  const passed = projects.filter(p => p.review === 'ผ่าน').length;
+  const total = projects.length;
+  const pct = n => total ? Math.round(n / total * 100) : 0;
+
+  $('#kpis').innerHTML = [
+    ['โครงการทั้งหมด', total, `${files} ไฟล์ในระบบ`, IC.doc, 'linear-gradient(135deg,#ffb35c,#e8642f)'],
+    ['ผู้วิจัย', people.length, 'ไม่นับซ้ำ', IC.user, 'linear-gradient(135deg,#ff8fb1,#cf4a78)'],
+    ['ส่งครบ 7 ส่วน', complete, `${pct(complete)}% ของโครงการ`, IC.done, 'linear-gradient(135deg,#4fd1a1,#0f8a62)'],
+    ['กำลังทยอยส่ง', total - complete, 'ยังขาดบางส่วน', IC.wave, 'linear-gradient(135deg,#6aa8ff,#2458c4)'],
+    ['ผ่านการตรวจ', passed, `${pct(passed)}% ของโครงการ`, IC.check, 'linear-gradient(135deg,#b3a6ff,#5a48c8)'],
+  ].map(([t, n, cap, ic, g], i) => `<div class="kpi" style="animation-delay:${i * 60}ms">
+      <span class="k-ico" style="--g:${g}" aria-hidden="true">${ic}</span><em>${t}</em><span class="num">${n.toLocaleString('th-TH')}</span><span class="cap">${cap}</span></div>`).join('');
+
+  // ส่งแล้วรายบท — แต่ละบทใช้สีประจำบท + ป้ายชื่อและตัวเลขกำกับทุกแท่ง
+  $('#barsCap').textContent = `จาก ${total} โครงการ`;
+  $('#bars').innerHTML = SLOTS.map(s => {
+    const n = projects.filter(p => p.slots[s.key]).length;
+    const w = total ? n / total * 100 : 0;
+    return `<div class="brow" role="listitem" tabindex="0" data-tt="${esc(s.label)} · ${esc(s.sub)}" data-tv="ส่งแล้ว ${n} จาก ${total} โครงการ (${Math.round(w)}%)" style="--c:${s.c}">
+      <span class="blabel"><i class="dot"></i><span>${s.label}</span></span><span class="btrack"><span class="bfill" data-w="${w.toFixed(1)}"></span></span>
+      <span class="bval">${n} <small>/ ${total}</small></span></div>`;
+  }).join('');
+
+  // การส่งงานรายสัปดาห์
+  const weeks = activity(projects);
+  const max = Math.max(1, ...weeks.map(w => w.n));
+  const peak = weeks.reduce((bi, w, i) => (w.n > weeks[bi].n ? i : bi), 0);
+  const sum = weeks.reduce((a, w) => a + w.n, 0);
+  $('#actCap').textContent = 'นับทุกครั้งที่ส่ง';
+  $('#cols').innerHTML = weeks.map((w, i) => {
+    const h = w.n / max * 100, last = i === weeks.length - 1;
+    const end = new Date(w.b.getTime() - 86400000);
+    const lab = (i === peak || last) && w.n ? `<b style="bottom:calc(${h.toFixed(1)}% + 4px)">${w.n}</b>` : '';
+    return `<div class="col${last ? ' now' : ''}" role="listitem" tabindex="0" data-tt="${thDM(w.a)} – ${thDM(end)}${last ? ' (สัปดาห์นี้)' : ''}" data-tv="ส่งงาน ${w.n} ครั้ง">${lab}<i data-h="${h.toFixed(1)}"></i></div>`;
+  }).join('');
+  $('#xlabels').innerHTML = weeks.map((w, i) => `<span${i === weeks.length - 1 ? ' class="now"' : ''}>${i === weeks.length - 1 ? 'สัปดาห์นี้' : thDM(w.a)}</span>`).join('');
+  $('#actSum').innerHTML = `<span>รวม 8 สัปดาห์ <b>${sum}</b> ครั้ง</span><span>สัปดาห์นี้ <b>${weeks[weeks.length - 1].n}</b> ครั้ง</span><span>เฉลี่ย <b>${(sum / 8).toFixed(1)}</b> ครั้ง/สัปดาห์</span>`;
+
+  // สถานะการตรวจ — แถบสัดส่วน + การ์ดไอคอน/ป้ายกำกับ
+  $('#stCap').textContent = `${total} โครงการ`;
+  const counts = statuses.map(st => ({ st, m: REVIEW[st] || REVIEW['รอตรวจ'], n: projects.filter(p => p.review === st).length }));
+  $('#stack').innerHTML = counts.filter(x => x.n).map(x => `<i class="${x.m.cls}" style="flex-grow:${x.n}"></i>`).join('');
+  $('#stlist').innerHTML = counts.map(x => `<li class="st ${x.m.cls}"><span class="st-ico" aria-hidden="true">${x.m.icon}</span><span class="st-name">${esc(x.st)}</span>
+      <span class="st-num">${x.n}<small>${pct(x.n)}%</small></span></li>`).join('');
+
+  // รูปแบบงานวิจัย (ค่าเดียว → สีเดียว)
+  const dmap = new Map();
+  projects.forEach(p => { const k = p.dshort || 'ไม่ระบุ'; dmap.set(k, (dmap.get(k) || 0) + 1); });
+  const dlist = Array.from(dmap.entries()).sort((a, b) => b[1] - a[1]);
+  const dmax = dlist.length ? dlist[0][1] : 1;
+  $('#dsCap').textContent = `${dlist.length} รูปแบบ`;
+  $('#dsBars').innerHTML = dlist.map(([k, n]) => {
+    const w = total ? n / total * 100 : 0, bw = n / dmax * 100;
+    return `<div class="brow" role="listitem" tabindex="0" data-tt="${esc(k)}" data-tv="${n} โครงการ (${Math.round(w)}%)">
+      <span class="blabel" title="${esc(k)}"><span>${esc(k)}</span></span><span class="btrack"><span class="bfill" data-w="${bw.toFixed(1)}"></span></span><span class="bval">${n}</span></div>`;
+  }).join('') || '<p class="muted-s">ยังไม่มีข้อมูล</p>';
+
+  requestAnimationFrame(() => {
+    $$('#insights .bfill').forEach(b => { b.style.width = b.dataset.w + '%'; });
+    $$('#cols .col i').forEach(b => { b.style.height = b.dataset.h + '%'; });
+  });
+
+  const dsel = $('#fDesign'), dcur = dsel.value;
+  dsel.innerHTML = '<option value="">ทุกรูปแบบ</option>' + dlist.map(([k]) => `<option value="${esc(k)}">${esc(k)}</option>`).join('');
+  dsel.value = dlist.some(([k]) => k === dcur) ? dcur : '';
+  const sel = $('#fReview');
+  if (sel.options.length <= 1) statuses.forEach(st => sel.insertAdjacentHTML('beforeend', `<option value="${esc(st)}">${esc(st)}</option>`));
+
+  $('#cntP').textContent = total;
+  $('#cntR').textContent = people.length;
+  $('#footInfo').textContent = `ข้อมูล ณ ${thTime(state.data.generatedAt)}${DEMO ? ' · ข้อมูลตัวอย่าง' : ''}`;
+  renderRegistry();
+}
+
+function activity(projects) {
+  const ev = [];
+  projects.forEach(p => {
+    if (p.history.length) { p.history.forEach(h => { if (h.at) ev.push(h.at); }); return; }
+    const seen = new Set();
+    Object.values(p.slots).forEach(s => { const d = toDate(s.at); if (d && !seen.has(d.toDateString())) { seen.add(d.toDateString()); ev.push(d); } });
+  });
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  start.setDate(start.getDate() - ((start.getDay() + 6) % 7));            // วันจันทร์ของสัปดาห์นี้
+  const weeks = [];
+  for (let i = 7; i >= 0; i--) {
+    const a = new Date(start); a.setDate(a.getDate() - i * 7);
+    const b = new Date(a); b.setDate(b.getDate() + 7);
+    weeks.push({ a, b, n: 0 });
+  }
+  ev.forEach(d => { const w = weeks.find(x => d >= x.a && d < x.b); if (w) w.n++; });
+  return weeks;
+}
+
+function filtered() {
+  const q = norm(state.q);
+  const list = state.data.projects.filter(p =>
+    (!q || p.hay.includes(q)) &&
+    (state.f === 'all' || (state.f === 'done' ? p.done >= p.total : p.done < p.total)) &&
+    (!state.review || p.review === state.review) &&
+    (!state.design || (p.dshort || 'ไม่ระบุ') === state.design));
+  const t = d => (d ? d.getTime() : 0);
+  const sorters = {
+    updated: (a, b) => t(b.updatedAt) - t(a.updatedAt),
+    first: (a, b) => t(b.firstAt) - t(a.firstAt),
+    progress: (a, b) => (b.done - a.done) || (t(b.updatedAt) - t(a.updatedAt)),
+    title: (a, b) => a.title.localeCompare(b.title, 'th'),
+  };
+  return list.sort(sorters[state.sort] || sorters.updated);
+}
+
+function badge(st, extra) {
+  const m = REVIEW[st] || REVIEW['รอตรวจ'];
+  return `<span class="badge ${m.cls}${extra ? ' ' + extra : ''}">${m.icon}${esc(st || 'รอตรวจ')}</span>`;
+}
+function segs(p) {
+  return `<span class="segs" aria-hidden="true">${SLOTS.map(s => {
+    const x = p.slots[s.key];
+    return `<i class="sg${x ? ' on' : ''}${x && x.v > 1 ? ' v2' : ''}" style="--c:${s.c};--h:${s.h}px" title="${s.label}: ${x ? 'ส่งแล้ว ฉบับที่ ' + x.v : 'ยังไม่ส่ง'}"></i>`;
+  }).join('')}</span><span class="frac${p.done >= p.total ? ' full' : ''}">${p.done}/${p.total}</span>`;
+}
+function initials(r) {
+  const strip = s => String(s || '').replace(/^(นาย|นางสาว|นาง|ดร\.?|ผศ\.?|รศ\.?|ศ\.?|อ\.|mr\.?|mrs\.?|ms\.?|dr\.?)\s*/i, '').replace(/^[เแโใไ]/, '');
+  const a = Array.from(strip(r.firstName))[0] || '', b = Array.from(strip(r.lastName))[0] || '';
+  return (a + b).toUpperCase() || '?';
+}
+function avatar(r) {
+  let h = 0; for (const ch of r.who || r.name || '') h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const [a, b] = AV[h % AV.length];
+  return `<span class="avatar" style="--av:linear-gradient(135deg,${a},${b})" aria-hidden="true">${esc(initials(r))}</span>`;
+}
+
+function renderRegistry() {
+  const body = $('#regBody');
+  const list = filtered();
+  if (!state.data.projects.length) {
+    body.innerHTML = `<div class="empty"><b>ยังไม่มีงานวิจัยในระบบ</b>เมื่อมีการส่งงานครั้งแรก รายชื่อจะแสดงที่นี่อัตโนมัติ<br><br><a class="btn primary" href="${CONFIG.FORM_URL}">ไปหน้าส่งงาน</a></div>`;
+    return;
+  }
+  if (!list.length) { body.innerHTML = '<div class="empty"><b>ไม่พบรายการที่ตรงกับเงื่อนไข</b>ลองเปลี่ยนคำค้นหาหรือตัวกรอง</div>'; return; }
+
+  if (state.view === 'people') {
+    body.innerHTML = `<div class="people">${groupPeople(list).map((r, i) => `
+      <article class="person" style="animation-delay:${Math.min(i, 12) * 40}ms">
+        <div class="p-top">${avatar(r)}<div><b>${esc(r.name)}</b><small>${esc(r.workplaces.join(' · '))}</small></div></div>
+        <div class="p-stats"><span><b>${r.projects.length}</b> โครงการ</span><span><b>${r.files}</b> ไฟล์ที่ส่ง</span><span>ล่าสุด <b>${thShort(r.updatedAt)}</b></span></div>
+        <ul class="p-list">${r.projects.map(p => `<li data-open="${esc(p.code)}" tabindex="0" title="เปิดหน้างานวิจัย"><div class="t">${esc(p.title)}</div>${p.dshort ? `<span class="dz">${esc(p.dshort)}</span>` : ''}
+          <div class="row2"><span class="code">${esc(p.code)}</span><span class="prog">${segs(p)}</span></div>
+          <div class="row2">${badge(p.review)}<span class="c-date">อัปเดต ${thShort(p.updatedAt)}</span></div></li>`).join('')}</ul>
+      </article>`).join('')}</div>`;
+    return;
+  }
+
+  body.innerHTML = `<table><thead><tr><th>#</th><th>งานวิจัย</th><th>ผู้วิจัย · สถานที่ทำงาน</th><th>ความคืบหน้า (7 ส่วน)</th>
+    <th>สถานะการตรวจ</th><th>อัปเดตล่าสุด</th><th><span class="sr-only">เปิด</span></th></tr></thead><tbody>${list.map((p, i) => `
+      <tr class="row" data-open="${esc(p.code)}" tabindex="0" title="เปิดหน้างานวิจัย">
+        <td class="c-idx">${String(i + 1).padStart(2, '0')}</td>
+        <td class="c-title"><span class="code">${esc(p.code)}</span><div class="t">${esc(p.title)}</div>${p.dshort ? `<span class="dz">${esc(p.dshort)}</span>` : ''}</td>
+        <td class="c-who"><span class="who">${avatar(p)}<span><b>${esc(p.name)}</b><small>${esc(p.workplace)}</small></span></span></td>
+        <td class="c-prog"><span class="prog">${segs(p)}</span></td>
+        <td class="c-rev">${badge(p.review)}</td>
+        <td class="c-date">${thShort(p.updatedAt)}</td>
+        <td class="c-go"><span class="go-btn">${IC.book}เปิดอ่าน</span></td></tr>`).join('')}</tbody></table>`;
+}
+
+function groupPeople(list) {
+  const map = new Map();
+  list.forEach(p => {
+    const r = map.get(p.who) || { name: p.name, who: p.who, firstName: p.firstName, lastName: p.lastName, workplaces: [], projects: [], files: 0, updatedAt: null };
+    if (p.workplace && !r.workplaces.includes(p.workplace)) r.workplaces.push(p.workplace);
+    r.projects.push(p); r.files += p.done;
+    if (!r.updatedAt || (p.updatedAt && p.updatedAt > r.updatedAt)) r.updatedAt = p.updatedAt;
+    map.set(p.who, r);
+  });
+  return Array.from(map.values()).sort((a, b) => (b.updatedAt ? b.updatedAt.getTime() : 0) - (a.updatedAt ? a.updatedAt.getTime() : 0));
+}
+
+function showError(msg) {
+  $('#regBody').innerHTML = `<div class="error"><b>โหลดข้อมูลไม่สำเร็จ</b>${esc(msg)}<br><br><button type="button" class="btn" id="btnRetry">ลองอีกครั้ง</button></div>`;
+  $('#btnRetry').addEventListener('click', () => load());
+}
+function showKeyForm(msg) {
+  $('#regBody').innerHTML = `<div class="error"><b>ต้องใช้รหัสผ่าน Dashboard</b>${esc(msg)}
+    <form class="keyform" id="keyForm"><input type="password" id="keyIn" placeholder="รหัสผ่าน" autocomplete="current-password" aria-label="รหัสผ่าน Dashboard"><button class="btn primary" type="submit">เข้าดู</button></form></div>`;
+  $('#keyForm').addEventListener('submit', e => {
+    e.preventDefault();
+    state.key = $('#keyIn').value.trim();
+    ssSet(KEY_STORE, state.key);
+    load();
+  });
+  $('#keyIn').focus();
+}
+
+/* ───────── เส้นทาง: หน้ารวม ⇄ หน้างานวิจัย (#/p/รหัส/บท) ───────── */
+function openProject(code, slot) {
+  state.listY = window.scrollY;
+  state.fromList = true;
+  location.hash = '#/p/' + code + (slot ? '/' + slot : '');
+}
+function route(force) {
+  const m = /^#\/p\/([A-Za-z0-9-]+)(?:\/([a-z0-9]+))?/.exec(location.hash);
+  if (!m) { showList(); return; }
+  if (!state.data) return;
+  const code = m[1].toUpperCase();
+  const p = state.data.projects.find(x => x.code === code);
+  if (!p) {
+    showList();
+    toast('ไม่พบโครงการ ' + code + (DEMO ? '' : ' — อาจถูกลบไปแล้ว'));
+    try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ }
+    return;
+  }
+  const same = !$('#viewProject').hidden && state.cur && state.cur.code === code;
+  if (same && !force) { if (m[2] && m[2] !== state.cur.slot) setReader(p, m[2]); return; }
+  const keepFid = same && state.cur ? state.cur.fid : '';
+  $('#viewList').hidden = true;
+  $('#viewProject').hidden = false;
+  renderProject(p, m[2] || (same && state.cur ? state.cur.slot : ''), keepFid);
+  if (!same) { window.scrollTo(0, 0); const t = $('#pjTitle'); if (t) t.focus({ preventScroll: true }); }
+  document.title = `${p.code} · Dashboard งานวิจัย`;
+}
+function showList() {
+  const was = !$('#viewProject').hidden;
+  $('#viewProject').hidden = true;
+  $('#viewProject').innerHTML = '';
+  $('#viewList').hidden = false;
+  state.cur = null;
+  document.title = 'Dashboard งานวิจัย · Research Uplink';
+  if (was) requestAnimationFrame(() => window.scrollTo(0, state.listY || 0));
+}
+function goList() {
+  if (state.fromList) { state.fromList = false; history.back(); }
+  else location.hash = '';
+}
+window.addEventListener('hashchange', () => route());
+const curProject = () => state.cur && state.data ? state.data.projects.find(x => x.code === state.cur.code) : null;
+
+/* ───────── หน้างานวิจัยรายโครงการ ───────── */
+function versionsOf(p, key) {
+  const map = new Map();
+  p.history.forEach(h => h.docs.forEach(d => {
+    const s = slotOf(d.label);
+    if (!s || s.key !== key || map.has(d.id)) return;
+    const m = /v(\d+)\s*$/.exec(d.label);
+    map.set(d.id, { id: d.id, v: m ? Number(m[1]) : 1, at: h.at });
+  }));
+  const cur = p.slots[key];
+  if (cur && cur.id && !map.has(cur.id)) map.set(cur.id, { id: cur.id, v: cur.v, at: toDate(cur.at) });
+  return Array.from(map.values()).sort((a, b) => a.v - b.v);
+}
+function pickSlot(p, key) {
+  if (SLOTS.some(s => s.key === key)) return key;
+  const sent = SLOTS.filter(s => p.slots[s.key]);
+  if (!sent.length) return SLOTS[0].key;
+  return sent.reduce((best, s) => ((toDate(p.slots[s.key].at) || 0) > (toDate(p.slots[best.key].at) || 0) ? s : best), sent[0]).key;
+}
+
+function renderProject(p, slotKey, fid) {
+  const pct = Math.round(p.done / p.total * 100);
+  const ok = state.okCode === p.code;
+  const hist = p.history.slice().reverse();
+  $('#viewProject').innerHTML = `
+    <nav class="crumbs" aria-label="ตำแหน่ง"><button type="button" class="btn" data-act="back">${IC.prev}กลับไปหน้ารวม</button>
+      <span>Dashboard</span><span aria-hidden="true">›</span><span class="mono">${esc(p.code)}</span></nav>
+    ${ok ? `<div class="okbar" role="status">${IC.ok}<span><b>ส่งงานเรียบร้อย!</b> งานของคุณอยู่ในระบบแล้ว ${p.done}/${p.total} ส่วน — เปิดอ่านแต่ละบทได้ด้านล่าง</span><button type="button" class="icon-x" data-act="ok-x" aria-label="ปิดข้อความ">${IC.x}</button></div>` : ''}
+    <section class="pj-hero" aria-label="ข้อมูลโครงการ">
+      <div>
+        <div class="pj-tags"><span class="code-chip">${esc(p.code)}</span>${p.dshort ? `<span class="tag-g">${esc(p.dshort)}</span>` : ''}${badge(p.review, 'glass')}</div>
+        <h1 class="pj-title" id="pjTitle" tabindex="-1">${esc(p.title)}</h1>
+        <div class="pj-meta"><span>${IC.user}${esc(p.name)}</span><span>${IC.pin}${esc(p.workplace)}</span>
+          <span>${IC.cal}ส่งครั้งแรก ${thShort(p.firstAt)}</span><span>${IC.layers}ส่งแล้ว ${p.rounds} ครั้ง · อัปเดต ${thShort(p.updatedAt)}</span></div>
+        <div class="pj-actions">
+          <a class="btn glass" href="${CONFIG.FORM_URL}?code=${encodeURIComponent(p.code)}">${IC.up}ส่งบทต่อ / ฉบับแก้ไข</a>
+          <button type="button" class="btn glass" data-act="copy">${IC.copy}คัดลอกรหัส</button>
+          ${p.folderId && FILE_ID.test(p.folderId) && !DEMO ? `<a class="btn glass" href="https://drive.google.com/drive/folders/${encodeURIComponent(p.folderId)}" target="_blank" rel="noopener">${IC.folder}โฟลเดอร์ Drive</a>` : ''}
+          <span class="sp"></span>
+          <button type="button" class="btn glass" data-act="edit">${IC.edit}แก้ไข</button>
+          <button type="button" class="btn glass danger" data-act="del-project">${IC.trash}ลบโครงการ</button>
+        </div>
+      </div>
+      <div class="ring" role="img" aria-label="ความคืบหน้า ${p.done} จาก ${p.total} ส่วน">
+        <svg viewBox="0 0 100 100"><circle class="rt" cx="50" cy="50" r="42"/><circle class="rb" cx="50" cy="50" r="42" pathLength="100" style="stroke-dashoffset:${100 - pct}"/></svg>
+        <div><b>${p.done}/${p.total}</b><small>${pct}%</small></div>
+      </div>
+    </section>
+    <div class="pj-grid">
+      <section class="panel pj-nav" aria-label="เอกสารรายบท">
+        <div class="card-h pad"><h2>เอกสารรายบท</h2><small>เลือกเพื่อเปิดอ่าน</small></div>
+        <div class="chs">${SLOTS.map(s => {
+          const x = p.slots[s.key];
+          return `<button type="button" class="ch${x ? '' : ' miss'}" data-slot="${s.key}" style="--c:${s.c}">
+            <span class="cn"><i class="dot"></i></span><span><b>${s.label}</b><small>${x ? esc(x.name || s.sub) : s.sub}</small></span>
+            <span class="vt">${x ? 'v' + x.v : 'ยังไม่ส่ง'}</span></button>`;
+        }).join('')}</div>
+      </section>
+      <section class="panel reader" id="reader" aria-label="อ่านเอกสาร"></section>
+      <div class="pj-info">
+        ${p.note ? `<section class="panel note-box"><h3>${IC.note}หมายเหตุจากผู้ตรวจ</h3><p>${esc(p.note)}</p></section>` : ''}
+        <section class="panel" aria-label="ประวัติการส่ง">
+          <div class="card-h pad"><h2>ประวัติการส่ง</h2><small>${hist.length ? hist.length + ' ครั้ง' : ''}</small></div>
+          ${hist.length ? `<ol class="tl">${hist.map(h => `<li><span class="when">${thDT(h.at)}</span><b>ครั้งที่ ${h.round}<em>${esc(h.kind)}</em></b>
+            <div class="dchips">${h.docs.map(d => { const s = slotOf(d.label) || SLOTS[0]; return `<button type="button" class="dchip" data-slot="${s.key}" data-fid="${esc(d.id)}" style="--c:${s.c}" title="เปิดฉบับนี้"><i class="dot"></i>${esc(d.label)}</button>`; }).join('') || `<span class="muted-s">${esc(h.text)}</span>`}</div></li>`).join('')}</ol>`
+          : `<p class="muted-s" style="padding:4px 18px 18px">${state.data.api < 3 ? 'อัปเดต Code.gs เป็นเวอร์ชันล่าสุดเพื่อแสดงประวัติการส่ง' : 'ยังไม่มีประวัติ'}</p>`}
+        </section>
+      </div>
+    </div>`;
+  setReader(p, pickSlot(p, slotKey), fid);
+}
+
+function setReader(p, key, fid) {
+  const s = SLOTS.find(x => x.key === key) || SLOTS[0];
+  const cur = p.slots[s.key];
+  const vers = versionsOf(p, s.key);
+  let file = fid ? vers.find(x => x.id === fid) || null : null;
+  if (!file && cur) file = { id: cur.id || '', v: cur.v, at: toDate(cur.at) };
+  const isCur = !!(file && cur && (file.id ? file.id === cur.id : true));
+  state.cur = { code: p.code, slot: s.key, fid: file && !isCur ? file.id : '' };
+  try { history.replaceState(null, '', `#/p/${p.code}/${s.key}`); } catch (e) { /* ignore */ }
+  $$('#viewProject .ch').forEach(b => b.classList.toggle('on', b.dataset.slot === s.key));
+  $$('#viewProject .tl .dchip').forEach(b => b.classList.toggle('on', !!(file && file.id) && b.dataset.fid === file.id));
+
+  const r = $('#reader');
+  r.style.setProperty('--c', s.c);
+  const name = isCur && cur.name ? cur.name : '';
+  const meta = file ? `ฉบับที่ ${file.v} · ${isCur ? 'ฉบับล่าสุด' : 'ฉบับก่อนหน้า'} · ส่ง ${thDT(file.at)}${name ? ' · ' + name : ''}` : 'ยังไม่ได้ส่งบทนี้';
+  const verBtns = vers.length > 1 ? `<div class="vers" role="group" aria-label="เลือกฉบับ">${vers.map(v => `<button type="button" data-slot="${s.key}" data-fid="${esc(v.id)}" class="${file && v.id === file.id ? 'on' : ''}" title="ฉบับที่ ${v.v}">v${v.v}</button>`).join('')}</div>` : '';
+  const realId = file && FILE_ID.test(file.id) && !isDemoId(file.id) ? file.id : '';
+  let stage, hint = '';
+  if (!file) {
+    stage = `<div class="rd-empty"><span class="big">${IC.doc}</span><b>ยังไม่ได้ส่ง${s.label}</b><span>${s.sub} — ผู้วิจัยส่งเพิ่มได้ด้วยรหัสโครงการเดิม</span>
+      <div><a class="btn primary" href="${CONFIG.FORM_URL}?code=${encodeURIComponent(p.code)}">${IC.up}ส่ง${s.label}</a></div>
+      ${vers.length ? `<span class="muted-s">มีฉบับก่อนหน้าในประวัติ</span><div class="dchips">${vers.map(v => `<button type="button" class="dchip" data-slot="${s.key}" data-fid="${esc(v.id)}" style="--c:${s.c}"><i class="dot"></i>${s.label} v${v.v}</button>`).join('')}</div>` : ''}</div>`;
+  } else if (isDemoId(file.id)) {
+    stage = `<div class="fake">${fakeDoc(p, s, file.v)}</div>`;
+    hint = '<p class="rd-hint">โหมดทดลอง — เมื่อเชื่อมต่อ Code.gs จริง ส่วนนี้จะแสดงไฟล์จาก Google Drive (PDF / Word) ให้อ่านได้ทันที</p>';
+  } else if (!realId) {
+    stage = `<div class="rd-empty"><span class="big">${IC.lock}</span><b>ยังเปิดอ่านในหน้านี้ไม่ได้</b><span>${state.data.api < 3
+      ? 'เซิร์ฟเวอร์ยังเป็น Code.gs เวอร์ชันเก่า — วาง Code.gs ใหม่ แล้ว Deploy → Manage deployments → New version'
+      : 'ผู้ดูแลปิดการแสดงไฟล์ไว้ (DASHBOARD_DETAILS) หรือเป็นข้อมูลจากระบบเวอร์ชันก่อน — เปิดดูได้จาก Google Sheets'}</span></div>`;
+  } else {
+    stage = `<iframe id="rdFrame" src="https://drive.google.com/file/d/${encodeURIComponent(realId)}/preview" title="${esc(s.label)} ฉบับที่ ${file.v}" allow="autoplay; fullscreen"></iframe>
+      <div class="rd-load" id="rdLoad"><span class="spinner"></span><span>กำลังเปิดเอกสาร…</span></div>`;
+    hint = '<p class="rd-hint">ถ้าเอกสารไม่แสดง: เข้าสู่ระบบบัญชี Google ที่มีสิทธิ์ดูโฟลเดอร์งาน หรือกด “เปิดใน Google Drive” — ผู้ดูแลเปิดให้ทุกคนอ่านได้ด้วย SHARE_FILES_WITH_LINK ใน Code.gs</p>';
+  }
+  const i = SLOTS.indexOf(s);
+  r.innerHTML = `<div class="rd-bar">
+      <div class="rd-t"><b><i class="dot"></i>${s.label}<span class="sub">${s.sub}</span></b><small title="${esc(meta)}">${esc(meta)}</small></div>
+      ${verBtns}
+      <div class="rd-act">
+        <button type="button" class="ibtn" data-act="prev" title="บทก่อนหน้า" aria-label="บทก่อนหน้า"${i <= 0 ? ' disabled' : ''}>${IC.prev}</button>
+        <button type="button" class="ibtn" data-act="next" title="บทถัดไป" aria-label="บทถัดไป"${i >= SLOTS.length - 1 ? ' disabled' : ''}>${IC.next}</button>
+        ${realId ? `<a class="ibtn" href="${viewUrl(realId)}" target="_blank" rel="noopener" title="เปิดใน Google Drive" aria-label="เปิดใน Google Drive">${IC.ext}</a>
+        <a class="ibtn" href="https://drive.google.com/uc?export=download&amp;id=${encodeURIComponent(realId)}" target="_blank" rel="noopener" title="ดาวน์โหลด" aria-label="ดาวน์โหลด">${IC.dl}</a>` : ''}
+        ${file ? `<button type="button" class="ibtn" data-act="full" title="เต็มจอ" aria-label="เต็มจอ">${IC.full}</button>` : ''}
+        ${isCur ? `<button type="button" class="ibtn danger" data-act="del-file" title="ลบไฟล์${s.label}" aria-label="ลบไฟล์${s.label}">${IC.trash}</button>` : ''}
+      </div></div>
+    <div class="rd-stage">${stage}</div>${hint}`;
+  const fr = $('#rdFrame');
+  if (fr) {
+    const done = () => { const l = $('#rdLoad'); if (l) l.classList.add('gone'); };
+    fr.addEventListener('load', done);
+    setTimeout(done, 9000);
+  }
+}
+
+function fakeDoc(p, s, v) {
+  const ln = ws => ws.map(w => `<div class="ln" style="width:${w}%"></div>`).join('');
+  const heads = {
+    ch1: ['ความเป็นมาและความสำคัญของปัญหา', 'วัตถุประสงค์ของการวิจัย', 'กรอบแนวคิดการวิจัย'],
+    ch2: ['แนวคิดและทฤษฎีที่เกี่ยวข้อง', 'งานวิจัยที่เกี่ยวข้อง', 'สรุปกรอบแนวคิด'],
+    ch3: ['รูปแบบการวิจัย', 'ประชากรและกลุ่มตัวอย่าง', 'เครื่องมือที่ใช้ในการวิจัย', 'การวิเคราะห์ข้อมูล'],
+    ch4: ['ข้อมูลทั่วไปของกลุ่มตัวอย่าง', 'ผลการวิเคราะห์ตามวัตถุประสงค์'],
+    ch5: ['สรุปผลการวิจัย', 'อภิปรายผล', 'ข้อเสนอแนะ'],
+    ref: ['ภาษาไทย', 'ภาษาอังกฤษ'],
+  };
+  const stamp = `<div class="stamp">ตัวอย่างเอกสาร · ฉบับที่ ${v}</div>`;
+  if (s.key === 'title') {
+    return `<div class="paper">${stamp}<h4 style="margin-top:40px;line-height:1.6">${esc(p.title)}</h4><p class="cen" style="margin-top:80px">${esc(p.name)}</p>
+      <p class="cen">${esc(p.workplace)}</p><p class="cen" style="margin-top:80px">${esc(shortDesign(p.design) || 'รายงานการวิจัย')}</p><p class="cen">พ.ศ. ${new Date().getFullYear() + 543}</p></div>`;
+  }
+  const title = s.key === 'ref' ? 'เอกสารอ้างอิง' : `${s.label}<br>${s.sub}`;
+  return `<div class="paper">${stamp}<h4>${title}</h4>${(heads[s.key] || []).map((h, i) =>
+    `<h5>${s.key === 'ref' ? '' : (SLOTS.indexOf(s)) + '.' + (i + 1) + ' '}${h}</h5>${ln([96, 100, 92, 98, 64])}${i % 2 ? '' : ln([100, 88, 95, 40])}`).join('')}</div>`;
+}
+
+/* ───────── ผู้ดูแล: แก้ไข / ลบ ───────── */
+function renderAdminPill() {
+  const b = $('#btnAdmin');
+  const on = !!state.admin;
+  b.classList.toggle('on', on);
+  b.innerHTML = `${on ? IC.unlock : IC.lock}<span class="lbl">ผู้ดูแล</span>`;
+  b.title = on ? 'อยู่ในโหมดผู้ดูแล — คลิกเพื่อออก' : 'เข้าสู่โหมดผู้ดูแล (แก้ไข / ลบ)';
+}
+const dlg = $('#dlg');
+function openDlg(html) {
+  dlg.innerHTML = html;
+  if (!dlg.open) dlg.showModal();
+  $$('[data-close]', dlg).forEach(b => b.addEventListener('click', () => dlg.close()));
+  const f = $('[autofocus]', dlg) || $('input,textarea,button', dlg);
+  if (f) setTimeout(() => f.focus(), 30);
+  return dlg;
+}
+const dlgHead = (ic, g, title, desc) => `<div class="dlg-h"><span class="k-ico" style="--g:${g}" aria-hidden="true">${ic}</span><div><h3 id="dlgTitle">${title}</h3>${desc ? `<p>${desc}</p>` : ''}</div></div>`;
+function infoDlg(title, desc) {
+  openDlg(`${dlgHead(IC.lock, 'linear-gradient(135deg,#ffb35c,#e8642f)', title, desc)}<div class="dlg-f"><button type="button" class="btn primary" data-close>เข้าใจแล้ว</button></div>`);
+}
+function askAdmin() {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = v => { if (!done) { done = true; resolve(v); } };
+    openDlg(`<form id="admForm">${dlgHead(IC.lock, 'linear-gradient(135deg,#c4573a,#8f3320)', 'เข้าสู่ระบบผู้ดูแล', DEMO ? 'โหมดทดลอง: พิมพ์อะไรก็ได้เพื่อทดลองปุ่มแก้ไข / ลบ' : 'ใช้ชื่อผู้ใช้และรหัสที่ตั้งไว้ใน Code.gs (ADMIN_USER / ADMIN_KEY) — ระบบจำไว้จนกว่าจะปิดแท็บนี้')}
+      <div class="dlg-b"><div class="fld"><label for="admUser">ชื่อผู้ใช้</label><input id="admUser" autocomplete="username" spellcheck="false" autocapitalize="off" value="${esc(state.adminUser)}" autofocus></div>
+        <div class="fld"><label for="admKey">รหัสผ่าน</label><input id="admKey" type="password" autocomplete="current-password" required></div><p class="dlg-err" id="admErr"></p></div>
+      <div class="dlg-f"><button type="button" class="btn" data-close>ยกเลิก</button><button type="submit" class="btn primary" id="admGo">เข้าสู่ระบบ</button></div></form>`);
+    dlg.addEventListener('close', () => finish(''), { once: true });
+    $('#admForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const u = $('#admUser').value.trim(), k = $('#admKey').value.trim();
+      if (!k) return;
+      $('#admGo').disabled = true; $('#admErr').textContent = '';
+      try {
+        await api({ action: 'auth', adminUser: u, adminKey: k });
+        state.admin = k; state.adminUser = u; ssSet(ADMIN_STORE, k); ssSet(ADMIN_USER_STORE, u); renderAdminPill();
+        finish(k); dlg.close(); toast('เข้าสู่โหมดผู้ดูแลแล้ว');
+      } catch (err) { $('#admErr').textContent = err.message; $('#admGo').disabled = false; $('#admKey').select(); }
+    });
+  });
+}
+async function withAdmin(fn) {
+  if (!DEMO && state.data && !state.data.canManage) {
+    infoDlg('ยังไม่ได้เปิดใช้การแก้ไข / ลบ', state.data.api < 3
+      ? 'อัปเดต Code.gs เป็นเวอร์ชันล่าสุด ตั้งค่า <b>ADMIN_KEY</b> แล้ว Deploy → Manage deployments → New version'
+      : 'ตั้งค่า <b>ADMIN_USER</b> และ <b>ADMIN_KEY</b> ใน Code.gs → Save → Deploy → Manage deployments → ✎ Edit → New version แล้วรีเฟรชหน้านี้');
+    return;
+  }
+  if (!state.admin && !(await askAdmin())) return;
+  try { await fn(state.admin); }
+  catch (e) {
+    if (/รหัสผู้ดูแล/.test(e.message)) { state.admin = ''; ssSet(ADMIN_STORE, ''); renderAdminPill(); }
+    throw e;
+  }
+}
+async function afterChange(msg, toList) {
+  if (dlg.open) dlg.close();
+  toast(msg);
+  if (toList) { state.cur = null; state.fromList = false; location.hash = ''; }
+  await load({ quick: true, force: true });
+}
+
+function editProject(p) {
+  withAdmin(() => new Promise(resolve => {
+    openDlg(`<form id="edForm">${dlgHead(IC.edit, 'linear-gradient(135deg,#6aa8ff,#2458c4)', 'แก้ไขข้อมูลโครงการ', `<span class="code-q">${esc(p.code)}</span>`)}
+      <div class="dlg-b">
+        <div class="fld"><label for="edTitle">ชื่อเรื่อง</label><textarea id="edTitle" maxlength="500" required autofocus>${esc(p.title)}</textarea></div>
+        <div class="fields2"><div class="fld"><label for="edFirst">ชื่อ</label><input id="edFirst" maxlength="100" required value="${esc(p.firstName)}"></div>
+          <div class="fld"><label for="edLast">สกุล</label><input id="edLast" maxlength="100" required value="${esc(p.lastName)}"></div></div>
+        <div class="fld"><label for="edWork">สถานที่ทำงาน</label><input id="edWork" maxlength="300" required value="${esc(p.workplace)}"></div>
+        <div class="fld"><label for="edDesign">รูปแบบงานวิจัย</label><input id="edDesign" maxlength="150" list="dsList" value="${esc(p.design)}"><datalist id="dsList">${DESIGNS.map(d => `<option value="${esc(d)}"></option>`).join('')}</datalist>
+          <div class="hint">เลือกจากรายการ หรือพิมพ์รูปแบบอื่นได้</div></div>
+        <div class="fld"><span class="lbl">สถานะการตรวจ</span><div class="rv-opts">${state.data.statuses.map(st => { const m = REVIEW[st] || REVIEW['รอตรวจ'];
+          return `<label class="rv ${m.cls}"><input type="radio" name="edRv" value="${esc(st)}"${st === p.review ? ' checked' : ''}><span>${m.icon}${esc(st)}</span></label>`; }).join('')}</div></div>
+        <div class="fld"><label for="edNote">หมายเหตุจากผู้ตรวจ</label><textarea id="edNote" maxlength="2000" placeholder="เช่น ปรับบทที่ 2 ให้ครอบคลุมงานวิจัย 5 ปีล่าสุด">${esc(p.note)}</textarea>
+          <div class="hint">${state.data.details || DEMO ? 'แสดงในหน้างานวิจัยของโครงการนี้' : 'บันทึกในชีต (หน้า Dashboard ยังไม่แสดงหมายเหตุ)'}</div></div>
+        <p class="dlg-err" id="edErr"></p>
+      </div>
+      <div class="dlg-f"><button type="button" class="btn" data-close>ยกเลิก</button><button type="submit" class="btn primary" id="edGo">${IC.check}บันทึกการแก้ไข</button></div></form>`);
+    dlg.addEventListener('close', () => resolve(), { once: true });
+    $('#edForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const v = id => $(id).value.replace(/\s+/g, ' ').trim();
+      const body = { action: 'update', adminKey: state.admin, submissionId: p.code, title: v('#edTitle'), firstName: v('#edFirst'), lastName: v('#edLast'),
+        workplace: v('#edWork'), design: v('#edDesign'), review: (($('input[name="edRv"]:checked', dlg) || {}).value) || '', note: $('#edNote').value.trim() };
+      const miss = [['ชื่อเรื่อง', body.title], ['ชื่อ', body.firstName], ['สกุล', body.lastName], ['สถานที่ทำงาน', body.workplace]].filter(x => !x[1]).map(x => x[0]);
+      if (miss.length) { $('#edErr').textContent = 'กรุณากรอก: ' + miss.join(', '); return; }
+      $('#edGo').disabled = true; $('#edErr').textContent = '';
+      try { await api(body); await afterChange('บันทึกการแก้ไขแล้ว'); }
+      catch (err) { $('#edErr').textContent = err.message; $('#edGo').disabled = false; if (/รหัสผู้ดูแล/.test(err.message)) { state.admin = ''; ssSet(ADMIN_STORE, ''); renderAdminPill(); } }
+    });
+  })).catch(e => toast(e.message));
+}
+
+function deleteFile(p, key) {
+  const s = SLOTS.find(x => x.key === key), x = p.slots[key];
+  if (!s || !x) return;
+  withAdmin(() => new Promise(resolve => {
+    openDlg(`${dlgHead(IC.trash, 'linear-gradient(135deg,#ff8a7a,#b8352a)', `ลบไฟล์${s.label}?`, `${esc(x.name || s.sub)} · ฉบับที่ ${x.v}`)}
+      <div class="dlg-b"><p style="margin:0;color:var(--text-2)">ไฟล์ฉบับปัจจุบันจะย้ายไป <b>ถังขยะของ Google Drive</b> (กู้คืนได้ภายใน 30 วัน) และ${s.label}จะกลับเป็น “ยังไม่ส่ง” — ฉบับก่อนหน้าและประวัติการส่งยังเก็บไว้</p><p class="dlg-err" id="dfErr"></p></div>
+      <div class="dlg-f"><button type="button" class="btn" data-close autofocus>ยกเลิก</button><button type="button" class="btn danger" id="dfGo">${IC.trash}ลบไฟล์</button></div>`);
+    dlg.addEventListener('close', () => resolve(), { once: true });
+    $('#dfGo').addEventListener('click', async () => {
+      $('#dfGo').disabled = true;
+      try { await api({ action: 'delete', adminKey: state.admin, submissionId: p.code, slot: key }); await afterChange(`ลบไฟล์${s.label}แล้ว`); }
+      catch (err) { $('#dfErr').textContent = err.message; $('#dfGo').disabled = false; }
+    });
+  })).catch(e => toast(e.message));
+}
+
+function deleteProject(p) {
+  withAdmin(() => new Promise(resolve => {
+    openDlg(`<form id="dpForm">${dlgHead(IC.trash, 'linear-gradient(135deg,#ff8a7a,#b8352a)', 'ลบทั้งโครงการ?', esc(p.title))}
+      <div class="dlg-b"><p style="margin:0;color:var(--text-2)">แถวโครงการจะถูกลบออกจากชีต และโฟลเดอร์งานทั้งหมด (${p.done} ไฟล์ + ฉบับก่อนหน้า) จะย้ายไป <b>ถังขยะของ Google Drive</b> — กู้คืนไฟล์ได้ภายใน 30 วัน</p>
+        <div class="fld"><label for="dpCode">พิมพ์รหัสโครงการ <span class="code-q">${esc(p.code)}</span> เพื่อยืนยัน</label><input id="dpCode" autocomplete="off" spellcheck="false" autofocus></div>
+        <p class="dlg-err" id="dpErr"></p></div>
+      <div class="dlg-f"><button type="button" class="btn" data-close>ยกเลิก</button><button type="submit" class="btn danger" id="dpGo" disabled>${IC.trash}ลบโครงการ</button></div></form>`);
+    dlg.addEventListener('close', () => resolve(), { once: true });
+    const inp = $('#dpCode'), go = $('#dpGo');
+    inp.addEventListener('input', () => { go.disabled = inp.value.toUpperCase().replace(/\s+/g, '') !== p.code; });
+    $('#dpForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      if (go.disabled) return;
+      go.disabled = true;
+      try { await api({ action: 'delete', adminKey: state.admin, submissionId: p.code, confirm: inp.value.trim() }); await afterChange(`ลบโครงการ ${p.code} แล้ว`, true); }
+      catch (err) { $('#dpErr').textContent = err.message; go.disabled = false; }
+    });
+  })).catch(e => toast(e.message));
+}
+
+$('#btnAdmin').addEventListener('click', () => {
+  if (state.admin) {
+    state.admin = ''; ssSet(ADMIN_STORE, ''); renderAdminPill(); toast('ออกจากโหมดผู้ดูแลแล้ว');
+  } else withAdmin(async () => {}).catch(e => toast(e.message));
+});
+
+/* ───────── interactions ───────── */
+$('#regBody').addEventListener('click', e => {
+  if (e.target.closest('a,button')) return;
+  const el = e.target.closest('[data-open]'); if (el) openProject(el.dataset.open);
+});
+$('#regBody').addEventListener('keydown', e => {
+  const el = e.target.closest && e.target.closest('[data-open]');
+  if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openProject(el.dataset.open); }
+});
+$('#viewProject').addEventListener('click', e => {
+  const p = curProject(); if (!p) return;
+  const a = e.target.closest('[data-act]');
+  if (a) {
+    const act = a.dataset.act;
+    if (act === 'back') goList();
+    else if (act === 'ok-x') { state.okCode = ''; a.closest('.okbar').remove(); }
+    else if (act === 'copy') {
+      const ok = () => { toast('คัดลอกรหัส ' + p.code + ' แล้ว'); };
+      if (navigator.clipboard) navigator.clipboard.writeText(p.code).then(ok, () => toast(p.code)); else toast(p.code);
+    }
+    else if (act === 'edit') editProject(p);
+    else if (act === 'del-project') deleteProject(p);
+    else if (act === 'del-file') deleteFile(p, state.cur.slot);
+    else if (act === 'full') { const r = $('#reader'); if (document.fullscreenElement) document.exitFullscreen(); else if (r.requestFullscreen) r.requestFullscreen().catch(() => {}); }
+    else if (act === 'prev' || act === 'next') {
+      const i = SLOTS.findIndex(s => s.key === state.cur.slot) + (act === 'next' ? 1 : -1);
+      if (SLOTS[i]) setReader(p, SLOTS[i].key);
+    }
+    return;
+  }
+  const b = e.target.closest('[data-slot]');
+  if (b) {
+    setReader(p, b.dataset.slot, b.dataset.fid || '');
+    if (window.innerWidth <= 980 && b.classList.contains('ch')) $('#reader').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || dlg.open || $('#viewProject').hidden || document.fullscreenElement) return;
+  goList();
+});
+
+$$('.tab').forEach(t => t.addEventListener('click', () => {
+  state.view = t.dataset.view;
+  $$('.tab').forEach(x => { const on = x === t; x.classList.toggle('on', on); x.setAttribute('aria-selected', on); });
+  if (state.data) renderRegistry();
+}));
+let qTimer;
+$('#q').addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = e.target.value; if (state.data) renderRegistry(); }, 160); });
+$$('.seg-filter button').forEach(b => b.addEventListener('click', () => {
+  state.f = b.dataset.f;
+  $$('.seg-filter button').forEach(x => x.classList.toggle('on', x === b));
+  if (state.data) renderRegistry();
+}));
+$('#fReview').addEventListener('change', e => { state.review = e.target.value; if (state.data) renderRegistry(); });
+$('#fDesign').addEventListener('change', e => { state.design = e.target.value; if (state.data) renderRegistry(); });
+$('#fSort').addEventListener('change', e => { state.sort = e.target.value; if (state.data) renderRegistry(); });
+$('#btnRefresh').addEventListener('click', () => load({ force: false }));
+
+/* tooltip (ข้อความล้วน ไม่แปลงเป็น HTML) */
+const tip = $('#tip');
+function showTip(el, x, y) {
+  $('b', tip).textContent = el.dataset.tt || '';
+  $('span', tip).textContent = el.dataset.tv || '';
+  const r = tip.getBoundingClientRect();
+  tip.style.left = Math.max(8, Math.min(window.innerWidth - r.width - 12, x + 14)) + 'px';
+  tip.style.top = Math.max(12, y - r.height - 12) + 'px';
+  tip.classList.add('show');
+}
+const ins = $('#insights');
+ins.addEventListener('pointermove', e => { const el = e.target.closest('[data-tt]'); if (el) showTip(el, e.clientX, e.clientY); else tip.classList.remove('show'); });
+ins.addEventListener('pointerleave', () => tip.classList.remove('show'));
+ins.addEventListener('focusin', e => { const el = e.target.closest('[data-tt]'); if (el) { const r = el.getBoundingClientRect(); showTip(el, r.left + r.width * 0.5, r.top); } });
+ins.addEventListener('focusout', () => tip.classList.remove('show'));
+
+/* CSV export (เฉพาะรายการที่กรองอยู่) */
+$('#btnCsv').addEventListener('click', () => {
+  if (!state.data) return;
+  const safe = v => { let s = String(v == null ? '' : v); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  const links = state.data.details && !DEMO;
+  const head = ['รหัสโครงการ', 'ชื่อเรื่อง', 'ชื่อ', 'สกุล', 'สถานที่ทำงาน', 'รูปแบบงานวิจัย', 'ส่งแล้ว', 'ทั้งหมด', ...SLOTS.map(s => s.label),
+    'สถานะการตรวจ', 'หมายเหตุ', 'จำนวนครั้งที่ส่ง', 'ส่งครั้งแรก', 'อัปเดตล่าสุด', ...(links ? SLOTS.map(s => 'ลิงก์ · ' + s.label) : [])];
+  const fmt = d => d ? d.toLocaleString('th-TH') : '';
+  const rows = filtered().map(p => [p.code, p.title, p.firstName, p.lastName, p.workplace, p.design, p.done, p.total,
+    ...SLOTS.map(s => p.slots[s.key] ? 'v' + p.slots[s.key].v : ''), p.review, p.note, p.rounds, fmt(p.firstAt), fmt(p.updatedAt),
+    ...(links ? SLOTS.map(s => p.slots[s.key] && FILE_ID.test(p.slots[s.key].id || '') ? viewUrl(p.slots[s.key].id) : '') : [])]);
+  const csv = [head, ...rows].map(r => r.map(safe).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `งานวิจัย_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+});
+
+/* มาจากหน้าส่งงาน (dashboard.html?code=RS-…) → เปิดหน้างานวิจัยของโครงการนั้นทันที */
+const ARRIVE = (new URLSearchParams(location.search).get('code') || '').toUpperCase().replace(/\s+/g, '');
+let arrived = false;
+function handleArrival() {
+  if (arrived || !CODE_RE.test(ARRIVE) || !state.data) return false;
+  arrived = true;
+  const p = state.data.projects.find(x => x.code === ARRIVE);
+  try { history.replaceState(null, '', location.pathname + (p ? '#/p/' + ARRIVE : '')); } catch (e) { /* ignore */ }
+  if (!p) { toast(`ส่งงานเรียบร้อย! รหัส ${ARRIVE} — ถ้ายังไม่เห็นในรายการ กดรีเฟรชอีกครั้งในอีกสักครู่`, 7000); route(); return true; }
+  state.okCode = ARRIVE;
+  route(true);
+  return true;
+}
+
+/* ───────── ข้อมูลตัวอย่าง (โหมดทดลอง) ───────── */
+function demoBuild() {
+  const names = [['ดร.สมชาย', 'ใจดี'], ['นางสาวพิมพ์ชนก', 'ศรีสวัสดิ์'], ['นายธนากร', 'วงศ์ไทย'], ['นางวิไลวรรณ', 'แก้วมณี'], ['ผศ.กิตติพงษ์', 'บุญมา'],
+    ['นางสาวอรอุมา', 'จันทร์หอม'], ['นายปิยะ', 'สุขสันต์'], ['ดร.สมชาย', 'ใจดี'], ['นางสาวชลธิชา', 'ทองคำ'], ['นายวีรยุทธ', 'พรหมมา'], ['นางกาญจนา', 'มีสุข'], ['นายอนุชา', 'ศักดิ์ดี']];
+  const places = ['โรงพยาบาลขอนแก่น', 'รพ.สต.บ้านโนน จ.ขอนแก่น', 'วิทยาลัยพยาบาลบรมราชชนนี', 'สำนักงานสาธารณสุขจังหวัดอุดรธานี', 'โรงพยาบาลชุมแพ', 'มหาวิทยาลัยขอนแก่น'];
+  const titles = ['การพัฒนารูปแบบการดูแลผู้ป่วยโรคเบาหวานชนิดที่ 2 แบบมีส่วนร่วมของชุมชน', 'ผลของโปรแกรมส่งเสริมความรอบรู้ด้านสุขภาพต่อพฤติกรรมการควบคุมความดันโลหิต',
+    'ปัจจัยที่มีความสัมพันธ์กับภาวะซึมเศร้าในผู้สูงอายุ', 'การพัฒนาแนวปฏิบัติการพยาบาลเพื่อป้องกันการพลัดตกหกล้มในหอผู้ป่วยใน', 'ประสิทธิผลของการใช้แอปพลิเคชันติดตามการกินยาในผู้ป่วยวัณโรค',
+    'การวิจัยเชิงปฏิบัติการเพื่อลดระยะเวลารอคอยในแผนกผู้ป่วยนอก', 'รูปแบบการจัดการขยะติดเชื้อในหน่วยบริการปฐมภูมิ', 'การประเมินผลโครงการคัดกรองมะเร็งปากมดลูกเชิงรุก',
+    'ผลของการสอนแบบสถานการณ์จำลองต่อความมั่นใจของนักศึกษาพยาบาล', 'การพัฒนาระบบการส่งต่อผู้ป่วยโรคหลอดเลือดสมองระยะเฉียบพลัน', 'ความรู้และทัศนคติต่อวัคซีนไข้หวัดใหญ่ของบุคลากรสาธารณสุข', 'การศึกษาต้นทุนต่อหน่วยบริการผู้ป่วยไตวายเรื้อรัง'];
+  const designs = [DESIGNS[0], DESIGNS[2], DESIGNS[5], DESIGNS[1], DESIGNS[3], DESIGNS[4], DESIGNS[6]];
+  const st = ['รอตรวจ', 'กำลังตรวจ', 'ส่งกลับแก้ไข', 'ผ่าน'];
+  const doneN = [7, 4, 2, 7, 5, 1, 3, 6, 7, 2, 4, 5];
+  const now = Date.now(), DAY = 86400000;
+  const projects = names.map((n, i) => {
+    const code = `RS-26${String(10 + (i % 2)).padStart(2, '0')}${String(1 + i * 2).padStart(2, '0')}-${String(1000 + i * 37).slice(-4)}-${'K7QXM2PA9BHT'.slice(i % 9, i % 9 + 4)}`;
+    const keys = SLOTS.slice(0, doneN[i]).map(s => s.key);
+    const slots = {}, history = [];
+    let t = now - (52 - i * 3.6) * DAY, round = 0;
+    const add = (chunk, kind) => {
+      round++;
+      t = Math.min(t + (3 + (i % 4)) * DAY, now - (0.2 + i * 0.05) * DAY);
+      const at = new Date(t).toISOString();
+      const docs = chunk.map(k => {
+        const s = SLOTS.find(x => x.key === k), v = (slots[k] ? slots[k].v : 0) + 1, id = `demo-${i}-${k}-v${v}`;
+        slots[k] = { v, at, id, name: `${s.label.replace(/\s/g, '')}_${n[1]}${v > 1 ? '_แก้ไข' : ''}.${k === 'title' ? 'pdf' : 'docx'}` };
+        return { label: `${s.label} v${v}`, id };
+      });
+      history.push({ at, round, kind, text: docs.map(d => d.label).join(' · '), docs });
+    };
+    for (let j = 0; j < keys.length; j += 2) add(keys.slice(j, j + 2), round ? 'ส่งเพิ่ม' : 'ส่งครั้งแรก');
+    if (i % 3 === 0 && keys.length > 1) add([keys[1]], 'ส่งฉบับแก้ไข');
+    const review = doneN[i] === 7 ? (i % 2 ? 'ผ่าน' : 'กำลังตรวจ') : st[i % 3];
+    return { code, title: titles[i], design: designs[i % designs.length], firstName: n[0], lastName: n[1], workplace: places[i % places.length],
+      done: keys.length, total: 7, slots, review, rounds: round, folderId: '', history,
+      note: review === 'ส่งกลับแก้ไข' ? 'ปรับบทที่ 2 ให้ครอบคลุมงานวิจัย 5 ปีล่าสุด และเพิ่มกรอบแนวคิดการวิจัยให้ชัดเจน' : '',
+      firstAt: history[0].at, updatedAt: history[history.length - 1].at };
+  });
+  return { projects };
+}
+function demoList() {
+  if (!state.demo) state.demo = demoBuild();
+  return { ok: true, api: 3, details: true, canManage: true, generatedAt: new Date().toISOString(), reviewStatuses: Object.keys(REVIEW),
+    projects: JSON.parse(JSON.stringify(state.demo.projects)) };
+}
+async function demoApi(b) {
+  await sleep(350);
+  if (!state.demo) state.demo = demoBuild();
+  if (b.action === 'auth') { if (!b.adminKey) throw new Error('กรุณากรอกรหัสผู้ดูแล'); return { ok: true }; }
+  const P = state.demo.projects, p = P.find(x => x.code === b.submissionId);
+  if (!p) throw new Error('ไม่พบโครงการ ' + b.submissionId);
+  if (b.action === 'update') {
+    ['title', 'firstName', 'lastName', 'workplace', 'design', 'note'].forEach(k => { p[k] = b[k]; });
+    if (b.review) p.review = b.review;
+    return { ok: true };
+  }
+  if (b.action === 'delete') {
+    if (b.slot) { delete p.slots[b.slot]; p.done = Object.keys(p.slots).length; p.updatedAt = new Date().toISOString(); return { ok: true }; }
+    if (String(b.confirm || '').toUpperCase() !== p.code) throw new Error('กรุณาพิมพ์รหัสโครงการให้ตรงเพื่อยืนยันการลบ');
+    P.splice(P.indexOf(p), 1);
+    return { ok: true, deleted: true };
+  }
+  throw new Error('ไม่รู้จักคำสั่ง');
+}
+
+/* init */
+if (DEMO) document.body.classList.add('is-demo');
+$$('.card-h h2 i[data-ic]').forEach(i => { i.innerHTML = IC[i.dataset.ic] || ''; });
+renderAdminPill();
+load();
+setInterval(() => { if (!document.hidden && !dlg.open) load({ silent: true }); }, CONFIG.REFRESH_MS);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && state.data && !dlg.open && Date.now() - state.data.generatedAt.getTime() > CONFIG.REFRESH_MS) load({ silent: true });
+});
+})();
+</script>
+</body>
+</html>
